@@ -54,9 +54,9 @@ void Wavefunction<ART>::ee_setup(int trace_start, int trace_end, const vector<in
 
 	//figure out how many reduced states there are		
 	trunc_states.clear();
-	for(int i=0;i<statep.size();i++){
+	for(unsigned int i=0;i<statep.size();i++){
 		found=false;
-		for(int j=0;j<trunc_states.size();j++)
+		for(unsigned int j=0;j<trunc_states.size();j++)
 			if( ( statep[i] & ~trunc_part) ==trunc_states[j]) found=true;
 		if(!found) trunc_states.push_back( statep[i] & ~trunc_part);
 	}
@@ -65,9 +65,9 @@ void Wavefunction<ART>::ee_setup(int trace_start, int trace_end, const vector<in
 template<class ART>
 void Wavefunction<ART>::ee_compute_rho(const vector<ART> &evec, Eigen::Matrix<ART,-1,-1> &rho2, const vector<int> &statep, double coeff=1){
 	//make matrix by looping over all states that aren't traced over
-	int ti,tj;
-	for(int i=0;i<evec.size();i++){
-		for(int j=0;j<evec.size();j++){
+	unsigned int ti,tj;
+	for(unsigned int i=0;i<evec.size();i++){
+		for(unsigned int j=0;j<evec.size();j++){
 			if( ( statep[i] & trunc_part) == ( statep[j] & trunc_part) ){
 				for(ti=0;ti<trunc_states.size();ti++)
 					if( ( statep[i] & ~trunc_part) == trunc_states[ti]) break;
@@ -88,7 +88,7 @@ double Wavefunction<ART>::ee_eval_rho(Eigen::Matrix<ART,-1,-1> &rho2){
 	//diagonalize matrix
 	Eigen::SelfAdjointEigenSolver<Eigen::Matrix<ART,-1,-1> > rs(rho2);
 	//output sum
-	for(int i=0;i<trunc_states.size();i++) 
+	for(unsigned int i=0;i<trunc_states.size();i++) 
 		if(rs.eigenvalues()(i)>0) out-=rs.eigenvalues()(i)*log(rs.eigenvalues()(i));
 	return out;
 }

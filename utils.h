@@ -98,7 +98,7 @@ double level_spacings(const vector<double> &x, const vector<double> &p, const ve
 	csout.open("tempS",ios::app);
 	double r=0;
 	int count=0;
-	for(unsigned int i=1;i<s.size()-1;i++){
+	for(unsigned int i=s.size()/6;i<5*s.size()/6;i++){
 		if(s[i+1]-s[i]>s[i]-s[i-1]) r+=(s[i]-s[i-1])/(s[i+1]-s[i]);
 		else r+=(s[i+1]-s[i])/(s[i]-s[i-1]);
 			count++;
