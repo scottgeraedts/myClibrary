@@ -26,9 +26,7 @@ class MatrixWithProduct {
 	ART *dense;
 	Eigen::SparseMatrix<ART> sparse;
 	Eigen::SimplicialLDLT< Eigen::SparseMatrix<ART> > sparseLU_solver;
-	Eigen::Matrix<ART,-1,-1> EigenDense;
 	Eigen::Matrix<ART, Eigen::Dynamic, 1> out; //used to store the results of solving the linear system in MultInvSparse
-	Eigen::SelfAdjointEigenSolver< Eigen::Matrix<ART,-1,-1> > es;
 	
 	int *ipiv;
 	vector< vector<ART> > eigvecs;
@@ -57,6 +55,7 @@ class MatrixWithProduct {
   void denseSolve();
   void printDense();
 	void EigenDenseEigs();
+	Eigen::Matrix<ART,-1,-1> EigenDense;
 
   void MultInvSparse(ART*v, ART* w);
   void makeSparse();
@@ -137,6 +136,7 @@ void MatrixWithProduct<ART>::makeDense(){
 }
 template<class ART>
 void MatrixWithProduct<ART>::EigenDenseEigs(){
+	Eigen::SelfAdjointEigenSolver< Eigen::Matrix<ART,-1,-1> > es;
 	es.compute(EigenDense);
 
 	//store eigenvalues

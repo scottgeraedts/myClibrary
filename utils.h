@@ -115,3 +115,59 @@ double level_spacings(const vector<double> &x, const vector<double> &p, const ve
 //	for(int i=0;i<p.size();i++) cout<<energy_grid[i]<<" "<<p[i]<<endl;
 	return r/(1.*count);
 }
+
+//counts the number of set bits in an integer
+int count_bits(int x){
+	int out=0, i=0,found_bits=0;
+	while(x!=found_bits){
+		if(1<<i & x){
+			out++;
+			found_bits+=1<<i;
+		}
+		i++;
+	}
+	return out;
+}
+
+///***Some functions related to calculating Clebsch-Gordan coefficients, which uses a lot of factorials, etc
+//computes the products of numbers from start to stop (a partial factorial)
+double factorial(int start,int stop){
+	if (stop==start) return 1;
+	else return start*factorial(start-1,stop);
+}	
+double factorial(int n){
+	if (n==1 || n==0) return 1;    
+	return n*factorial(n-1);
+}	
+//x choose p
+long int comb(int x,int p){
+	return factorial(x,x-p)/factorial(p);	
+}
+//a function for computing powers of integers
+int intpow(int x, int p)
+{
+  if (p == 0) return 1;
+  if (p == 1) return x;
+
+  int tmp = intpow(x, p/2);
+  if (p%2 == 0) return tmp * tmp;
+  else return x * tmp * tmp;
+}
+double ClebschGordan(int a,int b,int L, int NPhi){
+//calculate CG coefficients from the formula on wikipedia
+//m1=a-Q,m2=b-Q, 2Q=NPhi-1,these are stored this way because sometimes they are half-integer
+//may eventually need to tabulate these since they are pretty slow to calculate
+	double prefactor1=sqrt((2*L+1)*factorial(L)*factorial(L)*factorial((NPhi-1)-L)/(1.*factorial((NPhi-1)+L+1)) );
+	double prefactor2=sqrt(factorial(L+a+b-(NPhi-1))*factorial(L-a-b+(NPhi-1))*factorial((NPhi-1)-a)*factorial((NPhi-1)-b)*factorial(a)*factorial(b));
+	double sum=0.;
+	int sign=1;
+	for(int k=0;k<=b;k++){
+		if (k%2==1) sign=-1;
+		else sign=1;
+		if(L-b+k<0) continue;
+		if((NPhi-1)-L-k<0 || L-(NPhi-1)+a+k<0 || (NPhi-1)-a-k<0) continue;
+		sum+=(sign*1.)/(1.*factorial((NPhi-1)-L-k)*factorial((NPhi-1)-a-k)*factorial(b-k)*factorial(L-(NPhi-1)+a+k)*factorial(L-b+k)*factorial(k));
+	}
+	return prefactor1*prefactor2*sum;
+}
+
