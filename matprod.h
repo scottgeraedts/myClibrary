@@ -5,7 +5,7 @@ this can do all kinds of things to a matrix, all it needs is a matvec that inher
 #ifndef MATPROD_H
 #define MATPROD_H
 
-#include "lapacke.h"
+//#include "lapacke.h"
 #include <iostream>
 #include <Eigen/SparseCholesky>
 #include <Eigen/SparseLU>
@@ -164,7 +164,7 @@ void MatrixWithProduct<ART>::printDense(){
 //		cout<<endl;
 //	}
 }
-
+/*
 //compute the dense LU decomposition
 template<class ART>
 void MatrixWithProduct<ART>::denseLU(){
@@ -192,7 +192,7 @@ void MatrixWithProduct<ART>::denseSolve(){
 	for(int i=0;i<n;i++) cout<<w[i]<<endl;
 	delete [] w;
 }
-
+*/
 template<class ART>
 void MatrixWithProduct<ART>::makeSparse(){
 	sparse.resize(n,n);
