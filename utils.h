@@ -81,10 +81,14 @@ double level_spacings(const vector<double> &x, const vector<double> &p, const ve
 	ofstream csout;
 	csout.open("tempS",ios::app);
 	double r=0;
+	int count=0;
 	for(int i=1;i<s.size()-1;i++){
-		if(s[i+1]-s[i]>s[i]-s[i-1]) r+=(s[i]-s[i-1])/(s[i+1]-s[i]);
-		else r+=(s[i+1]-s[i])/(s[i]-s[i-1]);
+//		if(s[i+1]-s[i]>s[i]-s[i-1]) r+=(s[i]-s[i-1])/(s[i+1]-s[i]);
+//		else r+=(s[i+1]-s[i])/(s[i]-s[i-1]);
 		if(x[i]>-4 && x[i]<4){
+			count++;
+			if(x[i+1]-x[i]>x[i]-x[i-1]) r+=(x[i]-x[i-1])/(x[i+1]-x[i]);
+			else r+=(x[i+1]-x[i])/(x[i]-x[i-1]);
 			csout<<x[i]<<" "<<s[i]<<" ";
 			if(x[i+1]-x[i]>x[i]-x[i-1]) csout<<(x[i]-x[i-1])/(x[i+1]-x[i])<<" ";
 			else csout<<(x[i+1]-x[i])/(x[i]-x[i-1])<<" ";
@@ -93,6 +97,6 @@ double level_spacings(const vector<double> &x, const vector<double> &p, const ve
 		}
 	}
 	csout.close();
-	for(int i=0;i<p.size();i++) cout<<energy_grid[i]<<" "<<p[i]<<endl;
-	return r/(1.*(s.size()-2));
+//	for(int i=0;i<p.size();i++) cout<<energy_grid[i]<<" "<<p[i]<<endl;
+	return r/(1.*count);
 }
