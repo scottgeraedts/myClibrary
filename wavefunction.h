@@ -88,9 +88,12 @@ double Wavefunction<ART>::ee_eval_rho(Eigen::Matrix<ART,-1,-1> &rho2){
 	//diagonalize matrix
 	Eigen::SelfAdjointEigenSolver<Eigen::Matrix<ART,-1,-1> > rs(rho2);
 	//output sum
-	for(unsigned int i=0;i<trunc_states.size();i++) 
-		if(rs.eigenvalues()(i)>0) out-=rs.eigenvalues()(i)*log(rs.eigenvalues()(i));
+	for(unsigned int i=0;i<trunc_states.size();i++){
+		if(rs.eigenvalues()(i)>0){
+			out-=rs.eigenvalues()(i)*log(rs.eigenvalues()(i));
+			//cout<<log(rs.eigenvalues()(i))<<endl;
+		}
+	}
 	return out;
 }
-	
 #endif

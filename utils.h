@@ -116,6 +116,27 @@ double level_spacings(const vector<double> &x, const vector<double> &p, const ve
 	return r/(1.*count);
 }
 
+double stupid_spacings(const vector<double> &x){
+	int count=0;
+	double r=0;
+	for(unsigned int i=x.size()/6;i<5*x.size()/6;i++){
+		if(x[i+1]-x[i]>x[i]-x[i-1]) r+=(x[i]-x[i-1])/(x[i+1]-x[i]);
+		else r+=(x[i+1]-x[i])/(x[i]-x[i-1]);
+		count++;
+	}
+	return r/(1.*count);
+}
+//computes kullback-leibler divergences (see arxiv 1411.0660)
+template<class ART>
+double kullback_leibler(const vector<ART> &x, const vector<ART> &y){
+	double out=0,p,q;
+	for(unsigned int i=0;i<x.size();i++){
+		p=abs(x[i])*abs(x[i]);
+		q=abs(y[i])*abs(y[i]);
+		out+=p*log(p/q);
+	}
+	return out;
+}
 //counts the number of set bits in an integer
 int count_bits(int x){
 	int out=0, i=0,found_bits=0;
