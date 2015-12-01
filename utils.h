@@ -94,8 +94,8 @@ double level_spacings(const vector<double> &x, const vector<double> &p, const ve
 //	for(int i=0;i<p.size();i++) cout<<energy_grid[i]<<" "<<p[i]<<" "<<s[i]<<" "<<ps[i]<<endl;
 	
 	//compute r
-	ofstream csout;
-	csout.open("tempS",ios::app);
+//	ofstream csout;
+//	csout.open("tempS",ios::app);
 	double r=0;
 	int count=0;
 	for(unsigned int i=s.size()/6;i<5*s.size()/6;i++){
@@ -104,14 +104,14 @@ double level_spacings(const vector<double> &x, const vector<double> &p, const ve
 			count++;
 //			if(x[i+1]-x[i]>x[i]-x[i-1]) r+=(x[i]-x[i-1])/(x[i+1]-x[i]);
 //			else r+=(x[i+1]-x[i])/(x[i]-x[i-1]);
-			csout<<x[i]<<" "<<s[i]<<" ";
-			if(x[i+1]-x[i]>x[i]-x[i-1]) csout<<(x[i]-x[i-1])/(x[i+1]-x[i])<<" ";
-			else csout<<(x[i+1]-x[i])/(x[i]-x[i-1])<<" ";
-			if(s[i+1]-s[i]>s[i]-s[i-1]) csout<<(s[i]-s[i-1])/(s[i+1]-s[i])<<" "<<endl;
-			else csout<<(s[i+1]-s[i])/(s[i]-s[i-1])<<endl;
+//			csout<<x[i]<<" "<<s[i]<<" ";
+//			if(x[i+1]-x[i]>x[i]-x[i-1]) csout<<(x[i]-x[i-1])/(x[i+1]-x[i])<<" ";
+//			else csout<<(x[i+1]-x[i])/(x[i]-x[i-1])<<" ";
+//			if(s[i+1]-s[i]>s[i]-s[i-1]) csout<<(s[i]-s[i-1])/(s[i+1]-s[i])<<" "<<endl;
+//			else csout<<(s[i+1]-s[i])/(s[i]-s[i-1])<<endl;
 //		}
 	}
-	csout.close();
+//	csout.close();
 //	for(int i=0;i<p.size();i++) cout<<energy_grid[i]<<" "<<p[i]<<endl;
 	return r/(1.*count);
 }
@@ -133,7 +133,7 @@ double kullback_leibler(const vector<ART> &x, const vector<ART> &y){
 	for(unsigned int i=0;i<x.size();i++){
 		p=abs(x[i])*abs(x[i]);
 		q=abs(y[i])*abs(y[i]);
-		out+=p*log(p/q);
+		out+=(p-q)*log(p/q);
 	}
 	return out;
 }

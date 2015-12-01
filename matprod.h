@@ -29,8 +29,6 @@ class MatrixWithProduct {
 	Eigen::Matrix<ART, Eigen::Dynamic, 1> out; //used to store the results of solving the linear system in MultInvSparse
 	
 	int *ipiv;
-	vector< vector<ART> > eigvecs;
-	vector<int> lowlevpos;
 
  public:
 
@@ -41,6 +39,8 @@ class MatrixWithProduct {
 	}
 	
 	vector<double> eigvals;
+	vector< vector<ART> > eigvecs;
+	vector<int> lowlevpos;
 	double getE(int a){return eigvals[lowlevpos[a]];}
 	vector<ART> getEV(int a){return eigvecs[lowlevpos[a]];}
 
