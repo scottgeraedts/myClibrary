@@ -148,6 +148,7 @@ void MatrixWithProduct<ART>::EigenDenseEigs(){
 	ART *temp2=new ART[n*n];
 	lowlevpos=vector<int>(n,0);
 	Eigen::Map< Eigen::Matrix<ART,-1,-1> >(temp2,n,n)=es.eigenvectors();
+	eigvecs.clear();
 	for(int i=0;i<n;i++){
 		eigvecs.push_back(vector<ART>(temp2+i*n,temp2+(i+1)*n));
 		lowlevpos[i]=i;
