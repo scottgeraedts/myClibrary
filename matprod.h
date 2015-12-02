@@ -59,10 +59,12 @@ class MatrixWithProduct {
 
   void MultInvSparse(ART*v, ART* w);
   void makeSparse(double E);
+  void SparseFromDense(double E);
   void sparseSolve();
 
   int eigenvalues(int k, double E);
   double single_energy(string whichp);
+  double single_energy_2(string whichp);
   double calcVarEigen(Eigen::Matrix<ART, Eigen::Dynamic, 1> v);
     
   ~MatrixWithProduct();
@@ -231,6 +233,31 @@ void MatrixWithProduct<ART>::makeSparse(double E){
 }
 
 template<class ART>
+void MatrixWithProduct<ART>::SparseFromDense(double E){
+//	vector<Eigen::Triplet<ART> > coeff;
+//	for(int i=0;i<n;i++){
+//		for(int j=i;j<n;j++){
+//			if( abs(EigenDense(i,j)) >1e-16){
+//				if(i==j)
+//					coeff.push_back( Eigen::Triplet<ART>(i,j, EigenDense(i,j)-E ) );
+//				else{ 
+//					coeff.push_back( Eigen::Triplet<ART>(i,j, EigenDense(i,j) ) );
+//					coeff.push_back( Eigen::Triplet<ART>(j,i,conj( EigenDense(i,j) ) ) );
+//				}
+//			}
+//		}
+//	}
+//	sparse.setFromTriplets(coeff.begin(), coeff.end() );
+	sparse=EigenDense.sparseView();
+	for(int i=0;i<n;i++) sparse.coeffRef(i,i)-=E;
+	sparseLU_solver.compute(sparse);
+	if(sparseLU_solver.info()!=0) {
+	  // decomposition failed
+	  cout<<"decomposition failed! "<<sparseLU_solver.info()<<endl;
+	}	
+}			
+			
+template<class ART>
 void MatrixWithProduct<ART>::MultInvSparse(ART *v, ART *w){
 
 	Eigen::Map <Eigen::Matrix<ART, Eigen::Dynamic, 1> > mapped_v(v,n);
@@ -266,7 +293,13 @@ void MatrixWithProduct<ART>::sparseSolve(){
 
 template<class ART>
 double MatrixWithProduct<ART>::single_energy(string whichp){
-	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), 1, this, &MatrixWithProduct< complex<double> >::MultMv,whichp,(int)0, 1e-10,1e6);
+	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), 1, this, &MatrixWithProduct< complex<double> >::MultMv,whichp,(int)0, 1e-4,1e6);
+	dprob.FindEigenvalues();
+	return dprob.Eigenvalue(0).real();
+}
+template<class ART>
+double MatrixWithProduct<ART>::single_energy_2(string whichp){
+	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), 1, this, &MatrixWithProduct< complex<double> >::MultMv,whichp,(int)0, 1e-4,1e6);
 	dprob.FindEigenvalues();
 	return dprob.Eigenvalue(0).real();
 }
@@ -291,16 +324,16 @@ int MatrixWithProduct< complex<double> >::eigenvalues(int stop, double E){
 			eigvecs[k]=*(dprob.StlEigenvector(k));
 		}
 	}else{
-		makeSparse(E);
+		SparseFromDense(E);
 		ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), stop, this, &MatrixWithProduct< complex<double> >::MultInvSparse,"LM");
-		dprob.FindEigenvalues();
+		dprob.FindEigenvectors();
 		
 		eigvals=vector<double>(dprob.ConvergedEigenvalues(),0);
 		eigvecs=vector<vector< complex<double> > >(dprob.ConvergedEigenvalues(),temp);
 		for(int k=0;k<dprob.ConvergedEigenvalues();k++){
 			eigvals[k]=1./dprob.Eigenvalue(k).real()+E;
 			//eigvals[k]=dprob.Eigenvalue(k).real();
-			//eigvecs[k]=*(dprob.StlEigenvector(k));
+			eigvecs[k]=*(dprob.StlEigenvector(k));
 		}
 		Nconverged=dprob.ConvergedEigenvalues();
 	}
