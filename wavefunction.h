@@ -22,7 +22,7 @@ public:
 	void ee_setup(int trunc_start, int trunc_end, const vector<int> &statep);
 	void ee_compute_rho(const vector<ART> &evec, Eigen::Matrix<ART,-1,-1> &rho2,  const vector<int> &statep, double coeff);
 	double ee_eval_rho(Eigen::Matrix<ART,-1,-1> &rho2);
-	double entanglement_entropy(const vector<ART> &evec, const vector <int> &statep);
+	double entanglement_entropy(const vector< vector<ART> > &evec, const vector <int> &statep, int start, int end);
 	vector<int> trunc_states;
 	int trunc_part;
 };
@@ -31,12 +31,14 @@ template<class ART>
 void Wavefunction<ART>::init_wavefunction(int n){ nBits=n; }
 
 template<class ART>
-double Wavefunction<ART>::entanglement_entropy(const vector<ART> &evec, const vector<int> &statep){
+double Wavefunction<ART>::entanglement_entropy(const vector< vector<ART> > &evec, const vector<int> &statep, int start, int end=-1){
 	double out=0;
+	if(end==-1) end=start+1;
 	for(int i=0;i<nBits;i++){
 		ee_setup(i,(i+nBits/2)%nBits,statep);
 		rho=Eigen::Matrix<ART,-1,-1>::Zero(trunc_states.size(), trunc_states.size() );
-		ee_compute_rho(evec,rho,statep,1.);
+		for(int j=start;j<end;j++)
+			ee_compute_rho(evec[j],rho,statep,1/(1.*(end-start)) );
 		out+=ee_eval_rho(rho)/(1.*nBits);
 	}
 	return out;
