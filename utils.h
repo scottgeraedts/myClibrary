@@ -5,6 +5,7 @@
 #include<iostream>
 #include<sstream>
 #include <vector>
+#include<bitset>
 
 using namespace std;
 
@@ -192,3 +193,29 @@ double ClebschGordan(int a,int b,int L, int NPhi){
 	return prefactor1*prefactor2*sum;
 }
 
+//***given an integer (which can be thought of as a bitstring) and a set of integers (bits to flip) and a vector of integers (possible end states)
+//flips the bits and finds their positions in the vector
+int lookup_flipped(int state, int a, const vector<int> &states){
+	int compare=state ^ 1<<a;
+	vector<int>::const_iterator low;
+	low=lower_bound(states.begin(),states.end(),compare);
+	if(low!=states.end()) return (low-states.begin());
+	else{
+		cout<<"error in lookup_flipped: "<<(bitset<30>)state<<" "<<(bitset<30>)compare<<endl;
+		exit(0);	
+		return 0;
+	}
+}
+int lookup_flipped(int state,int a, int b, const vector<int> &states){
+	int compare=state ^ 1<<a;
+	compare=compare ^ 1<<b;
+	vector<int>::const_iterator low;
+	low=lower_bound(states.begin(),states.end(),compare);
+	if(low!=states.end()) return (low-states.begin());
+	else{
+		cout<<"error in lookup_flipped: "<<(bitset<30>)state<<" "<<(bitset<30>)compare<<" "<<a<<" "<<b<<endl;
+		exit(0);	
+		return 0;
+	}
+}
+	
