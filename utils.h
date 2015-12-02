@@ -26,8 +26,10 @@ T value_from_file(ifstream &infile, T def){
 
 //given a vector, computes its level spacing ratio
 
-void density_of_states(const vector<double> &x, vector<double> &p, const vector<double> &energy_grid){
-	int count, mark=0;
+void density_of_states(const vector<double> &x, vector<double> &p, const vector<double> &energy_grid, int start=-1, int end=-1){
+	if(start==-1) start=0;
+	if(end==-1) end=x.size();
+	int count, mark=start;
 	double dE=energy_grid[1]-energy_grid[0];
 	for(int i=0;i<(signed)energy_grid.size();i++){
 		//for density of states, count how many states are within a certain energy window
@@ -38,21 +40,23 @@ void density_of_states(const vector<double> &x, vector<double> &p, const vector<
 				count++;
 //				cout<<"added energy "<<x[mark]<<" to grid point "<<energy_grid[i]<<endl;
 				mark++;
-				if(mark==(signed)x.size()) break;
+				if(mark==end) break;
 			}
 			else{
 //				cout<<"done with grid point "<<energy_grid[i]<<", energy at "<<x[mark]<<endl;
 				break;
 			}
 		}
-		p[i]+=count/(1.*x.size()*dE);
-		if(mark==(signed)x.size()) break;
+		p[i]+=count/(1.*(end-start)*dE);
+		if(mark==end) break;
 	}
 
 }
-double level_spacings(const vector<double> &x, const vector<double> &p, const vector<double> &energy_grid){
+double level_spacings(const vector<double> &x, const vector<double> &p, const vector<double> &energy_grid, int start=-1, int end=-1){
 
-	vector<double> s(x.size(),0);
+	if(start==-1) start=0;
+	if(end==-1) end=x.size();	
+	vector<double> s(end-start,0);
 //	vector<double> ps(ngrid,0);
 	
 	vector<double> integrated_DOS(p.size(),0);
@@ -63,11 +67,11 @@ double level_spacings(const vector<double> &x, const vector<double> &p, const ve
 	//use integrated density of states to get S, do a linear approximation between the different vales of integrated_DOS
 	vector<double>::const_iterator low;
 	int pos;
-	for(unsigned int i=0;i<s.size();i++){
-		low=lower_bound(energy_grid.begin(),energy_grid.end(),x[i]);
+	for(int i=0;i<end-start;i++){
+		low=lower_bound(energy_grid.begin(),energy_grid.end(),x[i+start]);
 		pos=low-energy_grid.begin();
 //		s[i]=integrated_DOS[pos];
-		s[i]=integrated_DOS[pos-1]+(x[i]-energy_grid[pos-1])*(integrated_DOS[pos]-integrated_DOS[pos-1])/(energy_grid[pos]-energy_grid[pos-1]);
+		s[i]=integrated_DOS[pos-1]+(x[i+start]-energy_grid[pos-1])*(integrated_DOS[pos]-integrated_DOS[pos-1])/(energy_grid[pos]-energy_grid[pos-1]);
 	}
 	
 //	//integrate density to get s
@@ -99,7 +103,7 @@ double level_spacings(const vector<double> &x, const vector<double> &p, const ve
 //	csout.open("tempS",ios::app);
 	double r=0;
 	int count=0;
-	for(unsigned int i=s.size()/6;i<5*s.size()/6;i++){
+	for(int i=1;i<end-start-1;i++){
 		if(s[i+1]-s[i]>s[i]-s[i-1]) r+=(s[i]-s[i-1])/(s[i+1]-s[i]);
 		else r+=(s[i+1]-s[i])/(s[i]-s[i-1]);
 			count++;
@@ -117,10 +121,12 @@ double level_spacings(const vector<double> &x, const vector<double> &p, const ve
 	return r/(1.*count);
 }
 
-double stupid_spacings(const vector<double> &x){
+double stupid_spacings(const vector<double> &x, int start=-1, int end=-1){
+	if(start==-1) start=0;
+	if(end==-1) end=x.size();
 	int count=0;
 	double r=0;
-	for(unsigned int i=x.size()/6;i<5*x.size()/6;i++){
+	for(int i=start+1;i<end-1;i++){
 		if(x[i+1]-x[i]>x[i]-x[i-1]) r+=(x[i]-x[i-1])/(x[i+1]-x[i]);
 		else r+=(x[i+1]-x[i])/(x[i]-x[i-1]);
 		count++;
@@ -138,6 +144,17 @@ double kullback_leibler(const vector<ART> &x, const vector<ART> &y){
 	}
 	return out;
 }
+
+//writes a vector to a provided file, optionally divides the vector by something first
+void write_vector(Eigen::Matrix<double,-1,1> &data, string filename, double C=1.){
+	ofstream out;
+	out.open(filename.c_str());
+	data/=C;
+	for(int i=0;i<data.size();i++) out<<data[i]<<" ";
+	out<<endl;
+	out.close();
+}
+
 //counts the number of set bits in an integer
 int count_bits(int x){
 	int out=0, i=0,found_bits=0;

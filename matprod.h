@@ -58,10 +58,11 @@ class MatrixWithProduct {
 	Eigen::Matrix<ART,-1,-1> EigenDense;
 
   void MultInvSparse(ART*v, ART* w);
-  void makeSparse();
+  void makeSparse(double E);
   void sparseSolve();
 
   int eigenvalues(int k, double E);
+  double single_energy(string whichp);
   double calcVarEigen(Eigen::Matrix<ART, Eigen::Dynamic, 1> v);
     
   ~MatrixWithProduct();
@@ -195,7 +196,7 @@ void MatrixWithProduct<ART>::denseSolve(){
 }
 */
 template<class ART>
-void MatrixWithProduct<ART>::makeSparse(){
+void MatrixWithProduct<ART>::makeSparse(double E){
 	sparse.resize(n,n);
 	vector<Eigen::Triplet<ART> > coeff;
 	Eigen::Triplet<ART> temp;
@@ -209,6 +210,7 @@ void MatrixWithProduct<ART>::makeSparse(){
 			w[j]=0;
 		}
 		MultMv(v,w);
+		for(int j=0;j<n;j++) w[j]-=v[j]*E;
 		for(int j=0; j<n; j++){
 		//	if (w[j]!=0) temp=Eigen::Triplet<ART>(j,i,w[j]);
 			if (abs(w[j])>1e-16) coeff.push_back( Eigen::Triplet<ART>(j,i,w[j]) );
@@ -262,6 +264,13 @@ void MatrixWithProduct<ART>::sparseSolve(){
 //	return w.norm();
 //}
 
+template<class ART>
+double MatrixWithProduct<ART>::single_energy(string whichp){
+	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), 1, this, &MatrixWithProduct< complex<double> >::MultMv,whichp,(int)0, 1e-10,1e6);
+	dprob.FindEigenvalues();
+	return dprob.Eigenvalue(0).real();
+}
+	
 template<class ART> //this generic template only serves to set the default value of E
 int MatrixWithProduct< ART >::eigenvalues(int stop, double E=-100){
 	return 0;
@@ -282,21 +291,25 @@ int MatrixWithProduct< complex<double> >::eigenvalues(int stop, double E){
 			eigvecs[k]=*(dprob.StlEigenvector(k));
 		}
 	}else{
-		makeSparse();
-		ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), stop, this, &MatrixWithProduct< complex<double> >::MultInvSparse,E,"LM");
+		makeSparse(E);
+		ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), stop, this, &MatrixWithProduct< complex<double> >::MultInvSparse,"LM");
 		dprob.FindEigenvalues();
 		
 		eigvals=vector<double>(dprob.ConvergedEigenvalues(),0);
 		eigvecs=vector<vector< complex<double> > >(dprob.ConvergedEigenvalues(),temp);
 		for(int k=0;k<dprob.ConvergedEigenvalues();k++){
-			//eigvals[k]=1./dprob.Eigenvalue(k).real()+E;
-			eigvals[k]=dprob.Eigenvalue(k).real();
-			cout<<eigvals[k]<<endl;
+			eigvals[k]=1./dprob.Eigenvalue(k).real()+E;
+			//eigvals[k]=dprob.Eigenvalue(k).real();
 			//eigvecs[k]=*(dprob.StlEigenvector(k));
 		}
 		Nconverged=dprob.ConvergedEigenvalues();
 	}
-	lowlevpos=sort_indexes(eigvals);	
+	if (Nconverged!=stop) cout<<"didn't get as many eigenvalues as expected! "<<Nconverged<<endl;
+	lowlevpos=sort_indexes(eigvals);	//get the sorted indices, then put eigenvalues in the right order
+	vector<double> temp_eigvals(stop,0);
+	for(int i=0;i<stop;i++) temp_eigvals[i]=eigvals[lowlevpos[i]];
+	eigvals=temp_eigvals;
+	
 	return Nconverged;
 //	for(int i=0;i<Nconverged;i++) cout<<dprob.Eigenvalue(i)<<endl;
 	
@@ -317,7 +330,7 @@ int MatrixWithProduct< double >::eigenvalues(int stop, double E){
 			eigvecs[k]=*(dprob.StlEigenvector(k));
 		}
 	}else{
-		makeSparse();
+		makeSparse(E);
 		ARSymStdEig<double, MatrixWithProduct<double> >  dprob(ncols(), stop, this, &MatrixWithProduct<double>::MultInvSparse,E,"LM");
 		dprob.FindEigenvalues();
 		

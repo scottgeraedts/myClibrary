@@ -34,7 +34,7 @@ template<class ART>
 double Wavefunction<ART>::entanglement_entropy(const vector< vector<ART> > &evec, const vector<int> &statep, int start, int end=-1){
 	double out=0;
 	if(end==-1) end=start+1;
-	for(int i=0;i<nBits;i++){
+	for(int i=0;i<nBits;i+=2){
 		ee_setup(i,(i+nBits/2)%nBits,statep);
 		rho=Eigen::Matrix<ART,-1,-1>::Zero(trunc_states.size(), trunc_states.size() );
 		for(int j=start;j<end;j++)
@@ -69,7 +69,7 @@ void Wavefunction<ART>::ee_compute_rho(const vector<ART> &evec, Eigen::Matrix<AR
 	//make matrix by looping over all states that aren't traced over
 	unsigned int ti,tj;
 	for(unsigned int i=0;i<evec.size();i++){
-		for(unsigned int j=0;j<evec.size();j++){
+		for(unsigned int j=i;j<evec.size();j++){
 			if( ( statep[i] & trunc_part) == ( statep[j] & trunc_part) ){
 				for(ti=0;ti<trunc_states.size();ti++)
 					if( ( statep[i] & ~trunc_part) == trunc_states[ti]) break;
@@ -80,6 +80,7 @@ void Wavefunction<ART>::ee_compute_rho(const vector<ART> &evec, Eigen::Matrix<AR
 					cout<<(bitset<16>)statep[i]<<" "<<(bitset<16>)statep[j]<<" "<<(bitset<16>)trunc_part<<endl;
 				}
 				rho2(ti,tj)+=coeff*(evec[i]*conj(evec[j]));
+				if(ti!=tj) rho2(tj,ti)+=coeff*(conj(evec[i])*evec[j]);
 			}
 		}
 	}
