@@ -120,7 +120,7 @@ double stupid_spacings(const vector<double> &x, int label, int start, int end){
 	stringstream filename;
 	filename<<"stupidhist"<<label;
 	ofstream outfile;
-	outfile.open(filename.str().c_str());
+	outfile.open(filename.str().c_str(),ios::app);
 	for(int i=start+1;i<end-1;i++){
 		if(x[i+1]-x[i]>x[i]-x[i-1]) temp=(x[i]-x[i-1])/(x[i+1]-x[i]);
 		else temp=(x[i+1]-x[i])/(x[i]-x[i-1]);

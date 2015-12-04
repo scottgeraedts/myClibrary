@@ -51,7 +51,7 @@ double kullback_leibler(const vector<ART> &x, const vector<ART> &y, int label){
 	stringstream filename;
 	filename<<"klhist"<<label;
 	ofstream outfile;
-	outfile.open(filename.str().c_str());
+	outfile.open(filename.str().c_str(),ios::app);
 	for(unsigned int i=0;i<x.size();i++){
 		p=abs(x[i])*abs(x[i]);
 		q=abs(y[i])*abs(y[i]);
