@@ -26,7 +26,7 @@ class MatrixWithProduct {
 	ART *dense;
 	Eigen::SparseMatrix<ART> sparse;
 	Eigen::SimplicialLDLT< Eigen::SparseMatrix<ART> > sparseLU_solver;
-	Eigen::Matrix<ART, Eigen::Dynamic, 1> out; //used to store the results of solving the linear system in MultInvSparse
+	Eigen::Matrix<ART, Eigen::Dynamic, 1> sparseLU_out; //used to store the results of solving the linear system in MultInvSparse
 	
 	int *ipiv;
 
@@ -263,9 +263,9 @@ void MatrixWithProduct<ART>::MultInvSparse(ART *v, ART *w){
 	Eigen::Map <Eigen::Matrix<ART, Eigen::Dynamic, 1> > mapped_v(v,n);
 //	Eigen::Matrix<ART,-1,1> mapped_v(n);
 //	for(int i=0;i<n;i++) mapped_v(i)=v[i];	
-	out=sparseLU_solver.solve(mapped_v);
+	sparseLU_out=sparseLU_solver.solve(mapped_v);
 	//for(int i=0;i<n;i++) w[i]=out(i);	
-	Eigen::Map <Eigen::Matrix<ART, -1, 1> > (w,n,1)=out; //using just out.data() fails for an unknown reason
+	Eigen::Map <Eigen::Matrix<ART, -1, 1> > (w,n,1)=sparseLU_out; //using just out.data() fails for an unknown reason
 }
 
 
@@ -309,7 +309,7 @@ int MatrixWithProduct< ART >::eigenvalues(int stop, double E=-100){
 	return 0;
 }
 template<>
-int MatrixWithProduct< complex<double> >::eigenvalues(int stop, double E){
+inline int MatrixWithProduct< complex<double> >::eigenvalues(int stop, double E){
 	vector< complex<double> >temp(n,0);
 	int Nconverged;
 	if (E==-100){
@@ -348,7 +348,7 @@ int MatrixWithProduct< complex<double> >::eigenvalues(int stop, double E){
 	
 }
 template<>
-int MatrixWithProduct< double >::eigenvalues(int stop, double E){
+inline int MatrixWithProduct< double >::eigenvalues(int stop, double E){
 	vector<double>temp(n,0);
 	int Nconverged;
 	if (E==-100){
