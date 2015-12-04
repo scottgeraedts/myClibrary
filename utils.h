@@ -56,7 +56,7 @@ double kullback_leibler(const vector<ART> &x, const vector<ART> &y, int label){
 		p=abs(x[i])*abs(x[i]);
 		q=abs(y[i])*abs(y[i]);
 		temp=(p-q)*log(p/q);
-		outfile<<temp<<endl;
+		if(i%100==0) outfile<<temp<<endl; //no need to save all points for each ROD, a few will be enough for a nice histogram
 		out+=temp;
 	}
 	outfile.close();
