@@ -44,7 +44,7 @@ class MatrixWithProduct {
 	double getE(int a){return eigvals[lowlevpos[a]];}
 	vector<ART> getEV(int a){return eigvecs[lowlevpos[a]];}
 
-  virtual void MultMv(ART* v, ART* w) = 0;
+  virtual void MultMv(ART* v, ART* w);
 //  virtual Eigen::Matrix<ART, Eigen::Dynamic, 1> MultEigen(Eigen::Matrix<ART, Eigen::Dynamic, 1>);//used so we can communicate with my lanczos, which is based on eigen
 
   void MultM2v(ART* v, ART* w);
@@ -64,7 +64,6 @@ class MatrixWithProduct {
 
   int eigenvalues(int k, double E);
   double single_energy(string whichp);
-  double single_energy_2(string whichp);
   double calcVarEigen(Eigen::Matrix<ART, Eigen::Dynamic, 1> v);
     
   ~MatrixWithProduct();
@@ -268,6 +267,15 @@ void MatrixWithProduct<ART>::MultInvSparse(ART *v, ART *w){
 	Eigen::Map <Eigen::Matrix<ART, -1, 1> > (w,n,1)=sparseLU_out; //using just out.data() fails for an unknown reason
 }
 
+template<class ART>
+void MatrixWithProduct<ART>::MultMv(ART *v, ART *w){
+
+	Eigen::Map <Eigen::Matrix<ART, Eigen::Dynamic, 1> > mapped_v(v,n);
+	sparseLU_out=EigenDense*mapped_v;
+	//for(int i=0;i<n;i++) w[i]=out(i);	
+	Eigen::Map <Eigen::Matrix<ART, -1, 1> > (w,n,1)=sparseLU_out; //using just out.data() fails for an unknown reason
+}
+
 
 //this doesn't do what you think it does! It converts the sparse matrix to a dense one and solves the dense one
 template <class ART>
@@ -293,13 +301,7 @@ void MatrixWithProduct<ART>::sparseSolve(){
 
 template<class ART>
 double MatrixWithProduct<ART>::single_energy(string whichp){
-	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), 1, this, &MatrixWithProduct< complex<double> >::MultMv,whichp,(int)0, 1e-4,1e6);
-	dprob.FindEigenvalues();
-	return dprob.Eigenvalue(0).real();
-}
-template<class ART>
-double MatrixWithProduct<ART>::single_energy_2(string whichp){
-	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), 1, this, &MatrixWithProduct< complex<double> >::MultMv,whichp,(int)0, 1e-4,1e6);
+	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), 5, this, &MatrixWithProduct< complex<double> >::MultMv,whichp,(int)0, 1e-4,1e6);
 	dprob.FindEigenvalues();
 	return dprob.Eigenvalue(0).real();
 }

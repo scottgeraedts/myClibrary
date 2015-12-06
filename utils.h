@@ -42,11 +42,11 @@ T value_from_file(ifstream &infile, T def){
 
 void density_of_states(const vector<double> &x, vector<double> &p, const vector<double> &energy_grid, int start=-1, int end=-1);
 double level_spacings(const vector<double> &x, const vector<double> &p, const vector<double> &energy_grid, int start=-1, int end=-1);
-double stupid_spacings(const vector<double> &x, int label, int start=-1, int end=-1);
+double stupid_spacings(const vector<double> &x, int label=0, int start=-1, int end=-1);
 
 //computes kullback-leibler divergences (see arxiv 1411.0660)
 template<class ART>
-double kullback_leibler(const vector<ART> &x, const vector<ART> &y, int label){
+double kullback_leibler(const vector<ART> &x, const vector<ART> &y, int label=0){
 	double out=0,p,q,temp;
 	stringstream filename;
 	filename<<"klhist"<<label;
@@ -55,8 +55,9 @@ double kullback_leibler(const vector<ART> &x, const vector<ART> &y, int label){
 	for(unsigned int i=0;i<x.size();i++){
 		p=abs(x[i])*abs(x[i]);
 		q=abs(y[i])*abs(y[i]);
-		temp=(p-q)*log(p/q);
-		if(i%100==0) outfile<<temp<<endl; //no need to save all points for each ROD, a few will be enough for a nice histogram
+		temp=(p)*log(p/q);
+		outfile<<temp<<endl; //no need to save all points for each ROD, a few will be enough for a nice histogram
+//		if(i%100==0) outfile<<temp<<endl; //no need to save all points for each ROD, a few will be enough for a nice histogram
 		out+=temp;
 	}
 	outfile.close();
