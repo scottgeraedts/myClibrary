@@ -42,7 +42,7 @@ T value_from_file(ifstream &infile, T def){
 
 void density_of_states(const vector<double> &x, vector<double> &p, const vector<double> &energy_grid, int start=-1, int end=-1);
 double level_spacings(const vector<double> &x, const vector<double> &p, const vector<double> &energy_grid, int start=-1, int end=-1);
-double stupid_spacings(const vector<double> &x, int label, int start=-1, int end=-1);
+double stupid_spacings(const vector<double> &x, int label=0, int start=-1, int end=-1);
 
 //computes kullback-leibler divergences (see arxiv 1411.0660)
 template<class ART>
@@ -52,6 +52,7 @@ double kullback_leibler(const vector<ART> &x, const vector<ART> &y){
 		p=abs(x[i])*abs(x[i]);
 		q=abs(y[i])*abs(y[i]);
 		temp=(p-q)*log(p/q);
+		temp=(p)*log(p/q);
 		out+=temp;
 	}
 	return out;
