@@ -46,20 +46,14 @@ double stupid_spacings(const vector<double> &x, int label, int start=-1, int end
 
 //computes kullback-leibler divergences (see arxiv 1411.0660)
 template<class ART>
-double kullback_leibler(const vector<ART> &x, const vector<ART> &y, int label){
+double kullback_leibler(const vector<ART> &x, const vector<ART> &y){
 	double out=0,p,q,temp;
-	stringstream filename;
-	filename<<"klhist"<<label;
-	ofstream outfile;
-	outfile.open(filename.str().c_str(),ios::app);
 	for(unsigned int i=0;i<x.size();i++){
 		p=abs(x[i])*abs(x[i]);
 		q=abs(y[i])*abs(y[i]);
 		temp=(p-q)*log(p/q);
-		if(i%100==0) outfile<<temp<<endl; //no need to save all points for each ROD, a few will be enough for a nice histogram
 		out+=temp;
 	}
-	outfile.close();
 	return out;
 }
 
