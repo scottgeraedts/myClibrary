@@ -190,21 +190,42 @@ int intpow(int x, int p)
   if (p%2 == 0) return tmp * tmp;
   else return x * tmp * tmp;
 }
-double ClebschGordan(int a,int b,int L, int NPhi){
+double ClebschGordan(int dj1,int dj2, int dm1, int dm2, int dJ){
 //calculate CG coefficients from the formula on wikipedia
-//m1=a-Q,m2=b-Q, 2Q=NPhi-1,these are stored this way because sometimes they are half-integer
+//annoyingly, the inputs to CG coefficients can be half-integer. Therefore this function takes TWICE the actual number as input
+//it uses this to calculate a bunch of factorials, the arguments to these factorials should always be integer so we just have to divide by 2
 //may eventually need to tabulate these since they are pretty slow to calculate
-	double prefactor1=sqrt((2*L+1)*factorial(L)*factorial(L)*factorial((NPhi-1)-L)/(1.*factorial((NPhi-1)+L+1)) );
-	double prefactor2=sqrt(factorial(L+a+b-(NPhi-1))*factorial(L-a-b+(NPhi-1))*factorial((NPhi-1)-a)*factorial((NPhi-1)-b)*factorial(a)*factorial(b));
-	double sum=0.;
-	int sign=1;
-	for(int k=0;k<=b;k++){
+	if( abs(dm1+dm2) > dJ || ( abs(dm1)%2!=dj1%2) || ( abs(dm2)%2!=dj2%2) || abs(dm1+dm2)%2!= dJ%2 ){
+		cout<<"bad arguments to clebsch gordan calculator"<<endl;
+		return 0;
+	}
+	double prefactor1=sqrt((dJ+1)*factorial( (dJ+dj1-dj2)/2 )*factorial( (dJ-dj1+dj2)/2 )*factorial( (dj1+dj2-dJ)/2 )/(1.*factorial( (dj1+dj2+dJ+2)/2 ) ) );
+	double prefactor2=sqrt( factorial( (dJ+dm1+dm2)/2 )*factorial( (dJ-dm1-dm2)/2 )*factorial( (dj1-dm1)/2 )*factorial( (dj1+dm1)/2 )*factorial( (dj2-dm2)/2 )*factorial( (dj2+dm2)/2 ));
+	double sum=0.,temp;
+	int sign=1,farg;
+	for(int k=0;k<=100;k++){
 		if (k%2==1) sign=-1;
 		else sign=1;
-		if(L-b+k<0) continue;
-		if((NPhi-1)-L-k<0 || L-(NPhi-1)+a+k<0 || (NPhi-1)-a-k<0) continue;
-		sum+=(sign*1.)/(1.*factorial((NPhi-1)-L-k)*factorial((NPhi-1)-a-k)*factorial(b-k)*factorial(L-(NPhi-1)+a+k)*factorial(L-b+k)*factorial(k));
+		temp=1/(1.*factorial(k));
+
+		farg=(dj1+dj2-dJ-2*k)/2;
+		if(farg<0) continue; else temp/=(1.*factorial(farg));
+
+		farg=(dj1-dm1-2*k)/2;
+		if(farg<0) continue; else temp/=(1.*factorial(farg));
+
+		farg=(dj2+dm2-2*k)/2;
+		if(farg<0) continue; else temp/=(1.*factorial(farg));
+
+		farg=(dJ-dj2+dm1+2*k)/2;
+		if(farg<0) continue; else temp/=(1.*factorial(farg));
+
+		farg=(dJ-dj1-dm2+2*k)/2;
+		if(farg<0) continue; else temp/=(1.*factorial(farg));
+
+		sum+=(sign*1.)*temp;
 	}
+//	cout<<prefactor1<<" "<<prefactor2<<" "<<sum<<endl;
 	return prefactor1*prefactor2*sum;
 }
 

@@ -74,7 +74,7 @@ long int comb(int x,int p);
 //a function for computing powers of integers
 int intpow(int x, int p);
 
-double ClebschGordan(int a,int b,int L, int NPhi);
+double ClebschGordan(int dj1, int dj2, int dm1, int dm2, int dJ);
 
 //***given an integer (which can be thought of as a bitstring) and a set of integers (bits to flip) and a vector of integers (possible end states)
 //flips the bits and finds their positions in the vector
