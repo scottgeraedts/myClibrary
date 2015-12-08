@@ -195,8 +195,9 @@ double ClebschGordan(int dj1,int dj2, int dm1, int dm2, int dJ){
 //annoyingly, the inputs to CG coefficients can be half-integer. Therefore this function takes TWICE the actual number as input
 //it uses this to calculate a bunch of factorials, the arguments to these factorials should always be integer so we just have to divide by 2
 //may eventually need to tabulate these since they are pretty slow to calculate
-	if( abs(dm1+dm2) > dJ || ( abs(dm1)%2!=dj1%2) || ( abs(dm2)%2!=dj2%2) || abs(dm1+dm2)%2!= dJ%2 ){
+	if( abs(dm1+dm2) > dJ || ( abs(dm1)%2!=dj1%2) || ( abs(dm2)%2!=dj2%2) || abs(dm1+dm2)%2!= dJ%2 || dj1+dj2<dJ ){
 		cout<<"bad arguments to clebsch gordan calculator"<<endl;
+		cout<<dj1<<" "<<dj2<<" "<<dm1<<" "<<dm2<<" "<<dJ<<endl;
 		return 0;
 	}
 	double prefactor1=sqrt((dJ+1)*factorial( (dJ+dj1-dj2)/2 )*factorial( (dJ-dj1+dj2)/2 )*factorial( (dj1+dj2-dJ)/2 )/(1.*factorial( (dj1+dj2+dJ+2)/2 ) ) );
