@@ -138,8 +138,7 @@ void MatrixWithProduct<ART>::makeDense(){
 }
 template<class ART>
 void MatrixWithProduct<ART>::EigenDenseEigs(){
-	Eigen::SelfAdjointEigenSolver< Eigen::Matrix<ART,-1,-1> > es;
-	es.compute(EigenDense);
+	Eigen::SelfAdjointEigenSolver< Eigen::Matrix<ART,-1,-1> > es(EigenDense);
 
 	//store eigenvalues
 	double *temp=new double[n];	

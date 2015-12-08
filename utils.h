@@ -10,6 +10,7 @@
 #include <vector>
 #include<bitset>
 #include<Eigen/Core>
+#include<cstdarg>
 
 using namespace std;
 
@@ -77,6 +78,6 @@ double ClebschGordan(int a,int b,int L, int NPhi);
 
 //***given an integer (which can be thought of as a bitstring) and a set of integers (bits to flip) and a vector of integers (possible end states)
 //flips the bits and finds their positions in the vector
-int lookup_flipped(int state, int a, const vector<int> &states);
-int lookup_flipped(int state,int a, int b, const vector<int> &states);
+int lookup_flipped(int i, const vector<int> &states, int numbits, ...);
+//int lookup_flipped(int state,int a, int b, const vector<int> &states);
 #endif
