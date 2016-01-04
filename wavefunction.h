@@ -23,6 +23,9 @@ public:
 	void ee_compute_rho(const vector<ART> &evec, Eigen::Matrix<ART,-1,-1> &rho2,  const vector<int> &statep, double coeff);
 	double ee_eval_rho(Eigen::Matrix<ART,-1,-1> &rho2);
 	double entanglement_entropy(const vector< vector<ART> > &evec, const vector <int> &statep, int start, int end);
+	double safe_mult(double,double);
+	complex<double> safe_mult( complex<double>, complex<double>);
+
 	vector<int> trunc_states;
 	int trunc_part;
 };
@@ -43,6 +46,7 @@ double Wavefunction<ART>::entanglement_entropy(const vector< vector<ART> > &evec
 	}
 	return out;
 }
+//sets up a vector of bitstrings, for states with parts traced over
 template<class ART>
 void Wavefunction<ART>::ee_setup(int trace_start, int trace_end, const vector<int> &statep){
 	bool found;
@@ -79,8 +83,8 @@ void Wavefunction<ART>::ee_compute_rho(const vector<ART> &evec, Eigen::Matrix<AR
 					cout<<ti<<" "<<tj<<endl;
 					cout<<(bitset<16>)statep[i]<<" "<<(bitset<16>)statep[j]<<" "<<(bitset<16>)trunc_part<<endl;
 				}
-				rho2(ti,tj)+=coeff*(evec[i]*conj(evec[j]));
-				if(ti!=tj) rho2(tj,ti)+=coeff*(conj(evec[i])*evec[j]);
+				rho2(ti,tj)+=coeff*safe_mult(evec[i],evec[j]);
+				if(ti!=tj) rho2(tj,ti)+=coeff*safe_mult(evec[j],evec[i]);
 			}
 		}
 	}
@@ -99,4 +103,8 @@ double Wavefunction<ART>::ee_eval_rho(Eigen::Matrix<ART,-1,-1> &rho2){
 	}
 	return out;
 }
+template< >
+inline double Wavefunction<double>::safe_mult(double x,double y){return x*y;}
+template< >
+inline complex<double> Wavefunction<complex<double> >::safe_mult(complex<double> x, complex<double> y){ return x*conj(y); }
 #endif

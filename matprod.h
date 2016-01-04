@@ -284,19 +284,19 @@ void MatrixWithProduct<ART>::sparseSolve(){
 	cout<<es.eigenvalues()<<endl;
 }
 
-//template <class ART>
-//double MatrixWithProduct<ART>::calcVarEigen(Eigen::Matrix<ART, Eigen::Dynamic, 1> evec){
-//	Eigen::Matrix<ART, Eigen::Dynamic, 1> w(n);
-//	double var,norm,eval;
+template <class ART>
+double MatrixWithProduct<ART>::calcVarEigen(Eigen::Matrix<ART, Eigen::Dynamic, 1> evec){
+	Eigen::Matrix<ART, Eigen::Dynamic, 1> w(n);
+	double var,norm,eval;
 
-//	norm=evec.norm();
-//	evec/=norm;
-//	w=MultEigen(evec);
-//	eval=w.dot(evec); //should I also return this eigenvalue?
-////	cout<<eval<<endl;
-//	w=w-eval*evec;
-//	return w.norm();
-//}
+	norm=evec.norm();
+	evec/=norm;
+	w=EigenDense*evec;
+	eval=w.dot(evec); //should I also return this eigenvalue?
+//	cout<<eval<<endl;
+	w=w-eval*evec;
+	return w.norm();
+}
 
 template<class ART>
 double MatrixWithProduct<ART>::single_energy(string whichp){

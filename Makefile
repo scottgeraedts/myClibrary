@@ -13,6 +13,8 @@ OBJECTS= utils.o
 
 all: $(OBJECTS)
 
+test: test.o utils.o
+	g++ test.o utils.o -o test
 .cpp.o:
 	$(CC) $(CFLAGS) $< -o $@
 	

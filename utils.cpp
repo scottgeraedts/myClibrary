@@ -230,6 +230,50 @@ double ClebschGordan(int dj1,int dj2, int dm1, int dm2, int dJ){
 	return prefactor1*prefactor2*sum;
 }
 
+double Wigner3j(int dj1,int dj2,int dj3,int dm1,int dm2,int dm3){
+	if(dm1+dm2+dm3!=0){
+		cout<<"arguments in Wigner3j don't make sense "<<dm1<<" "<<dm2<<" "<<dm3<<endl;
+		exit(0);
+	}
+	double out=1;
+	if( (dj1+dj2-dm3)%4==2) out=-1;
+	out/=sqrt(dj3+1.);
+//	cout<<"3j: "<<dj1<<" "<<dj2<<" "<<dj3<<" "<<dm1<<" "<<dm2<<" "<<dm3<<" "<<out*ClebschGordan(dj1,dj2,dm1,dm2,dj3)<<endl;
+	return out*ClebschGordan(dj1,dj2,dm1,dm2,dj3);
+}
+
+double Wigner6j(int dj1, int dj2, int dj3, int dj4, int dj5, int dj6){
+	double out=0,temp1,temp2,temp3;
+	int sign=1;
+	for(int dm1=-dj1;dm1<=dj1;dm1+=2){
+		for(int dm2=-dj2;dm2<=dj2;dm2+=2){
+			for(int dm3=-dj3;dm3<=dj3;dm3+=2){
+				//cout<<dm1<<" "<<dm2<<" "<<dm3<<endl;
+				if(dm1+dm2-dm3!=0) continue;
+				temp1=Wigner3j(dj1,dj2,dj3,dm1,dm2,-dm3);
+//				cout<<"----"<<endl;
+				for(int dm4=-dj4;dm4<=dj4;dm4+=2){
+					for(int dm5=-dj5;dm5<=dj5;dm5+=2){
+						//cout<<"    "<<dm4<<" "<<dm5<<endl;
+						if(dm4-dm5+dm3!=0) continue;
+						temp2=temp1*Wigner3j(dj4,dj5,dj3,dm4,-dm5,dm3);
+//						cout<<"***"<<endl;
+						for(int dm6=-dj6;dm6<=dj6;dm6+=2){
+							//cout<<"         "<<dm6<<endl;
+							if(-dm1+dm5+dm6!=0 || -dm4-dm2-dm6!=0) continue;
+							if( (dj1+dj2+dj3+dj4+dj5+dj6-dm1-dm2-dm3-dm4-dm5-dm6)%4==0) sign=1;
+							else sign=-1;
+							temp3=sign*temp2*Wigner3j(dj1,dj5,dj6,-dm1,dm5,dm6)*Wigner3j(dj4,dj2,dj6,-dm4,-dm2,-dm6);
+							out+=temp3;
+//							cout<<dm1<<" "<<dm2<<" "<<dm3<<" "<<dm4<<" "<<dm5<<" "<<dm6<<" "<<temp3<<endl;
+						}
+					}
+				}
+			}
+		}
+	}
+	return out;
+}
 //***given an integer (which can be thought of as a bitstring) and a set of integers (bits to flip) and a vector of integers (possible end states)
 //flips the bits and finds their positions in the vector
 int lookup_flipped(int i, const vector<int> &states, int numbits, ...){
@@ -256,6 +300,34 @@ int lookup_flipped(int i, const vector<int> &states, int numbits, ...){
 		return 0;
 	}
 }
+int permute_sign(int n, ...){
+	int sign=1;
+	va_list ap;
+	va_start(ap,n);
+	vector<int> elements(n,0);
+	
+	for(int j=0; j<n; j++){
+		elements[j]=va_arg(ap,int);
+	}
+	va_end(ap);
+	
+	int temp;
+	for(int j=n;j>0;j--){
+		for(int i=0;i<j-1;i++){
+			if(elements[i]>elements[i+1]){
+				 temp=elements[i];
+				 elements[i]=elements[i+1];
+				 elements[i+1]=temp;
+				 sign*=-1;
+			}
+		}
+	}
+	return sign;
+}		
+int lil_sign(int x){
+	if(x%2==0) return 1;
+	else return -1;
+}	
 //int lookup_flipped(int state,int a, int b, const vector<int> &states){
 //	int compare=state ^ 1<<a;
 //	compare=compare ^ 1<<b;

@@ -75,9 +75,13 @@ long int comb(int x,int p);
 int intpow(int x, int p);
 
 double ClebschGordan(int dj1, int dj2, int dm1, int dm2, int dJ);
+double Wigner3j(int dj1, int dj2, int dj3, int dm1, int dm2, int dm3);
+double Wigner6j(int dj1, int dj2, int dj3, int dj4, int dj5, int dj6);
 
 //***given an integer (which can be thought of as a bitstring) and a set of integers (bits to flip) and a vector of integers (possible end states)
 //flips the bits and finds their positions in the vector
 int lookup_flipped(int i, const vector<int> &states, int numbits, ...);
 //int lookup_flipped(int state,int a, int b, const vector<int> &states);
+int permute_sign(int n, ...);
+int lil_sign(int x);
 #endif
