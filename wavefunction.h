@@ -19,7 +19,7 @@ public:
 	void init_wavefunction(int);
 
 	//entanglement entropy stuff
-	void ee_setup(int trunc_start, int trunc_end, const vector<int> &statep);
+	int ee_setup(int trunc_start, int trunc_end, const vector<int> &statep);
 	void ee_compute_rho(const vector<ART> &evec, Eigen::Matrix<ART,-1,-1> &rho2,  const vector<int> &statep, double coeff);
 	double ee_eval_rho(Eigen::Matrix<ART,-1,-1> &rho2);
 	double entanglement_entropy(const vector< vector<ART> > &evec, const vector <int> &statep, int start, int end);
@@ -48,7 +48,7 @@ double Wavefunction<ART>::entanglement_entropy(const vector< vector<ART> > &evec
 }
 //sets up a vector of bitstrings, for states with parts traced over
 template<class ART>
-void Wavefunction<ART>::ee_setup(int trace_start, int trace_end, const vector<int> &statep){
+int Wavefunction<ART>::ee_setup(int trace_start, int trace_end, const vector<int> &statep){
 	bool found;
 
 	//compute trunc_part
@@ -66,6 +66,7 @@ void Wavefunction<ART>::ee_setup(int trace_start, int trace_end, const vector<in
 			if( ( statep[i] & ~trunc_part) ==trunc_states[j]) found=true;
 		if(!found) trunc_states.push_back( statep[i] & ~trunc_part);
 	}
+	return trunc_states.size();
 }
 
 template<class ART>

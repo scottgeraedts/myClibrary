@@ -49,7 +49,7 @@ vector<double> unfoldE(const vector<double> &x, int mesh){
 		//for density of states, count how many states are within a certain energy window
 		count=0;
 		while(true){
-	//		if(x[mark]<energy_grid[i]) cout<<"something didn't make sense in level_spacings "<<x[mark]<<" "<<energy_grid[i]<<" "<<mark<<" "<<i<<endl;
+//			if(x[mark]<energy_grid[i]) cout<<"something didn't make sense in level_spacings "<<x[mark]<<" "<<energy_grid[i]<<" "<<mark<<" "<<i<<endl;
 			if(x[mark]<energy_grid[i]+dE){
 				count++;
 				mark++;
