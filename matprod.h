@@ -32,7 +32,7 @@ class MatrixWithProduct {
 
  public:
 
-  int nrows() { return m; }
+  int nrows() { return m; }//size of matrix, ncols is kept for backwards compatibility with ARPACK but shouldnt be used
   int ncols() { return n; }
 	void setrows(int x){ 
 		m=x; n=x;
@@ -41,30 +41,33 @@ class MatrixWithProduct {
 	vector<double> eigvals;
 	vector< vector<ART> > eigvecs;
 	vector<int> lowlevpos;
-	double getE(int a){return eigvals[lowlevpos[a]];}
+	double getE(int a){return eigvals[lowlevpos[a]];} //ARPACK sometimes returns eigenvalues in the wrong order, these functions correct that
 	vector<ART> getEV(int a){return eigvecs[lowlevpos[a]];}
+	vector<int> sort_indexes(const vector<double> &v); //sorts the output of ARPACK so that the above functions return things in the right order
+	bool compy(int,int);
 
-  virtual void MultMv(ART* v, ART* w);
+  virtual void MultMv(ART* v, ART* w); //original Matvec
 //  virtual Eigen::Matrix<ART, Eigen::Dynamic, 1> MultEigen(Eigen::Matrix<ART, Eigen::Dynamic, 1>);//used so we can communicate with my lanczos, which is based on eigen
 
-  void MultM2v(ART* v, ART* w);
+  void MultM2v(ART* v, ART* w); //squares the original matvec
 
-  void MultInvDense(ART*v, ART* w);
-  void makeDense();
-  void denseLU();
-  void denseSolve();
-  void printDense();
-	void EigenDenseEigs();
+  void MultInvDense(ART*v, ART* w); //deprecated
+  void denseLU(); //deprecated
+  void denseSolve();//deprecated
+
+	void EigenDenseEigs(); //dense diagonalization
 	Eigen::Matrix<ART,-1,-1> EigenDense;
+	void makeDense(); //given a matvec, this computes a dense Eigen matrix for use with dense solvers
+	void printDense();//prints the dense matrix
 
-  void MultInvSparse(ART*v, ART* w);
-  void makeSparse(double E);
-  void SparseFromDense(double E);
-  void sparseSolve();
+  void MultInvSparse(ART*v, ART* w); //uses precomputed LU decomposition to solve a system when doing shift-invert
+  void makeSparse(double E); //makes a sparse matrix from a matvec and LU decomposes
+  void SparseFromDense(double E); //makes a sparse matrix from a dense matrix and LU decomposes
+  void sparseSolve(); //for testing purposes, dense solves sparse matrices
 
-  int eigenvalues(int k, double E);
-  double single_energy(string whichp);
-  double calcVarEigen(Eigen::Matrix<ART, Eigen::Dynamic, 1> v);
+  int eigenvalues(int k, double E); //computes eigenvalues and eigenvectors using ARPACK, E should be -100 if you want the ground state. If E is not -100, does shift-invert around E
+  double single_energy(string whichp); //finds only the highest or lowest state, used for estimating energy bounds before doing shift-invert to target a section of the spectrum
+  double calcVarEigen(Eigen::Matrix<ART, Eigen::Dynamic, 1> v); //calculates the variance of an eigenvector to see if polishing is needed
     
   ~MatrixWithProduct();
   
@@ -87,8 +90,6 @@ class MatrixWithProduct {
     ipiv=NULL;
   } // Constructor.
   
-  vector<int> sort_indexes(const vector<double> &v);
-	bool compy(int,int);
 	
 }; // MatrixWithProduct
 
@@ -117,7 +118,7 @@ void MatrixWithProduct<ART>::MultM2v(ART* v, ART* w)
 template<class ART>
 void MatrixWithProduct<ART>::makeDense(){
     EigenDense=Eigen::Matrix<ART,-1,-1>::Zero(n,n);
-	dense=new ART[n*n];
+//	dense=new ART[n*n];
 	ART *v=new ART[n];
 	ART *w=new ART[n];
 	for(int i=0;i<n;i++){
@@ -128,7 +129,7 @@ void MatrixWithProduct<ART>::makeDense(){
 		}
 		MultMv(v,w);
 		for(int j=0; j<n; j++){
-			dense[i+j*n]=w[j];
+//			dense[i+j*n]=w[j];
 			EigenDense(j,i)=w[j];
 		}
 	}
@@ -219,10 +220,6 @@ void MatrixWithProduct<ART>::makeSparse(double E){
 	sparse.setFromTriplets(coeff.begin(), coeff.end() );
 	delete [] v;
 	delete [] w;
-//	cout<<sparse<<endl;
-//}
-//template <class ART>
-//void  MatrixWithProduct<ART>::sparseLU(){
 	sparseLU_solver.compute(sparse);
 	if(sparseLU_solver.info()!=0) {
 	  // decomposition failed
@@ -232,20 +229,6 @@ void MatrixWithProduct<ART>::makeSparse(double E){
 
 template<class ART>
 void MatrixWithProduct<ART>::SparseFromDense(double E){
-//	vector<Eigen::Triplet<ART> > coeff;
-//	for(int i=0;i<n;i++){
-//		for(int j=i;j<n;j++){
-//			if( abs(EigenDense(i,j)) >1e-16){
-//				if(i==j)
-//					coeff.push_back( Eigen::Triplet<ART>(i,j, EigenDense(i,j)-E ) );
-//				else{ 
-//					coeff.push_back( Eigen::Triplet<ART>(i,j, EigenDense(i,j) ) );
-//					coeff.push_back( Eigen::Triplet<ART>(j,i,conj( EigenDense(i,j) ) ) );
-//				}
-//			}
-//		}
-//	}
-//	sparse.setFromTriplets(coeff.begin(), coeff.end() );
 	sparse=EigenDense.sparseView();
 	for(int i=0;i<n;i++) sparse.coeffRef(i,i)-=E;
 	sparseLU_solver.compute(sparse);
@@ -259,10 +242,7 @@ template<class ART>
 void MatrixWithProduct<ART>::MultInvSparse(ART *v, ART *w){
 
 	Eigen::Map <Eigen::Matrix<ART, Eigen::Dynamic, 1> > mapped_v(v,n);
-//	Eigen::Matrix<ART,-1,1> mapped_v(n);
-//	for(int i=0;i<n;i++) mapped_v(i)=v[i];	
 	sparseLU_out=sparseLU_solver.solve(mapped_v);
-	//for(int i=0;i<n;i++) w[i]=out(i);	
 	Eigen::Map <Eigen::Matrix<ART, -1, 1> > (w,n,1)=sparseLU_out; //using just out.data() fails for an unknown reason
 }
 
@@ -271,7 +251,6 @@ void MatrixWithProduct<ART>::MultMv(ART *v, ART *w){
 
 	Eigen::Map <Eigen::Matrix<ART, Eigen::Dynamic, 1> > mapped_v(v,n);
 	sparseLU_out=EigenDense*mapped_v;
-	//for(int i=0;i<n;i++) w[i]=out(i);	
 	Eigen::Map <Eigen::Matrix<ART, -1, 1> > (w,n,1)=sparseLU_out; //using just out.data() fails for an unknown reason
 }
 
@@ -287,7 +266,7 @@ void MatrixWithProduct<ART>::sparseSolve(){
 template <class ART>
 double MatrixWithProduct<ART>::calcVarEigen(Eigen::Matrix<ART, Eigen::Dynamic, 1> evec){
 	Eigen::Matrix<ART, Eigen::Dynamic, 1> w(n);
-	double var,norm,eval;
+	double norm,eval;
 
 	norm=evec.norm();
 	evec/=norm;

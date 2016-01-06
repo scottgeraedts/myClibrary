@@ -15,8 +15,73 @@
 //	else return def;
 //}	
 
-//given a vector, computes its level spacing ratio
+double compute_r(const vector<double> &s, int start, int end){
+	double r=0;
+	int count=0;
+	if(start==-1) start=0;
+	if(end==-1) end=s.size();
+	for(int i=start+1;i<end-start-1;i++){
+		if(s[i+1]-s[i]>s[i]-s[i-1]) r+=(s[i]-s[i-1])/(s[i+1]-s[i]);
+		else r+=(s[i+1]-s[i])/(s[i]-s[i-1]);
+		count++;
+	}
+	return r/(1.*count);
+}
+//computes raw level spacings (not r)
+vector<double> spacings(const vector<double> &x, int start, int end){
+	if(start==-1) start=0;
+	if(end==-1) end=x.size();
+	vector<double> out(end-start-1);
+	for(int i=start;i<end-1;i++){
+		out[i-start]=(x[i+1]-x[i])/(x[end-1]-x[start])*(end-start);
+	}
+	return out;
+}
+vector<double> unfoldE(const vector<double> &x, int mesh){
+	vector<double> s(x.size());
+	vector<double> energy_grid(mesh);
+	vector<double> p(mesh); //density of states
+	double dE=(x.back()-x[0])/(1.*mesh-5.);
+	for(int i=0;i<mesh;i++) energy_grid[i]=x[0]+dE*(i-1);
+	int mark=0,count;
 
+	for(int i=0;i<mesh;i++){
+		//for density of states, count how many states are within a certain energy window
+		count=0;
+		while(true){
+	//		if(x[mark]<energy_grid[i]) cout<<"something didn't make sense in level_spacings "<<x[mark]<<" "<<energy_grid[i]<<" "<<mark<<" "<<i<<endl;
+			if(x[mark]<energy_grid[i]+dE){
+				count++;
+				mark++;
+				if(mark==x.size()) break;
+			}
+			else{
+				//cout<<"done with grid point "<<energy_grid[i]<<", energy at "<<x[mark]<<endl;
+				break;
+			}
+		}
+		p[i]+=count/(1.*x.size()*dE);
+		if(mark==x.size()) break;
+	}
+	//compute integrated density of states with trapezoid rule
+	vector<double> integrated_DOS(mesh,0);
+	for(int i=1;i<mesh;i++)
+		integrated_DOS[i]=0.5*(p[i]+p[i-1])*(energy_grid[i]-energy_grid[i-1])+integrated_DOS[i-1];
+
+	ofstream dos;
+	dos.open("dos");
+	for(int i=0;i<mesh;i++) dos<<energy_grid[i]<<" "<<p[i]<<" "<<integrated_DOS[i]<<endl;
+	dos.close();
+	//use integrated density of states to get S, do a linear approximation between the different vales of integrated_DOS
+	vector<double>::const_iterator low;
+	int pos;
+	for(int i=0;i<(signed)x.size();i++){
+		low=lower_bound(energy_grid.begin(),energy_grid.end(),x[i]);
+		pos=low-energy_grid.begin();
+		s[i]=integrated_DOS[pos-1]+(x[i]-energy_grid[pos-1])*(integrated_DOS[pos]-integrated_DOS[pos-1])/(energy_grid[pos]-energy_grid[pos-1]);
+	}
+	return s;
+}
 void density_of_states(const vector<double> &x, vector<double> &p, const vector<double> &energy_grid, int start, int end){
 	if(start==-1) start=0;
 	if(end==-1) end=x.size();
@@ -34,7 +99,6 @@ void density_of_states(const vector<double> &x, vector<double> &p, const vector<
 				if(mark==end) break;
 			}
 			else{
-//				cout<<"done with grid point "<<energy_grid[i]<<", energy at "<<x[mark]<<endl;
 				break;
 			}
 		}
@@ -43,6 +107,10 @@ void density_of_states(const vector<double> &x, vector<double> &p, const vector<
 	}
 
 }
+/*x: data to take spacings of
+  p: density of states
+  energy_grid: grid to measure denstiy of states on
+*/
 double level_spacings(const vector<double> &x, const vector<double> &p, const vector<double> &energy_grid, int start, int end){
 
 	if(start==-1) start=0;
@@ -65,30 +133,6 @@ double level_spacings(const vector<double> &x, const vector<double> &p, const ve
 		s[i]=integrated_DOS[pos-1]+(x[i+start]-energy_grid[pos-1])*(integrated_DOS[pos]-integrated_DOS[pos-1])/(energy_grid[pos]-energy_grid[pos-1]);
 	}
 	
-//	//integrate density to get s
-//	for(int i=0;i<(signed)s.size();i++){
-//		for(int j=0;j<=(signed)p.size();j++){
-//			if(energy_grid[j]>x[i]) break;
-//			else s[i]+=p[j];
-//		}
-//	}
-//	for(int i=0;i<s.size();i++) cout<<s[i]<<endl;
-//	//for testing purposes, compute density of s
-//	for(int i=0;i<ngrid;i++){
-//		//for density of states, count how many states are within a certain energy window
-//		count=0;
-//		while(true){
-//			if(s[mark]<energy_grid[i]-0.5*dE) cout<<"something didn't make sense in level_spacings test"<<endl;
-//			if(s[mark]<energy_grid[i]+0.5*dE){
-//				count++;
-//				mark++;
-//			}
-//			else break;
-//		}
-//		ps[i]+=count;
-//	}
-//	for(int i=0;i<p.size();i++) cout<<energy_grid[i]<<" "<<p[i]<<" "<<s[i]<<" "<<ps[i]<<endl;
-	
 	//compute r
 //	ofstream csout;
 //	csout.open("tempS",ios::app);
@@ -98,14 +142,7 @@ double level_spacings(const vector<double> &x, const vector<double> &p, const ve
 		if(s[i+1]-s[i]>s[i]-s[i-1]) r+=(s[i]-s[i-1])/(s[i+1]-s[i]);
 		else r+=(s[i+1]-s[i])/(s[i]-s[i-1]);
 			count++;
-//			if(x[i+1]-x[i]>x[i]-x[i-1]) r+=(x[i]-x[i-1])/(x[i+1]-x[i]);
-//			else r+=(x[i+1]-x[i])/(x[i]-x[i-1]);
-//			csout<<x[i]<<" "<<s[i]<<" ";
-//			if(x[i+1]-x[i]>x[i]-x[i-1]) csout<<(x[i]-x[i-1])/(x[i+1]-x[i])<<" ";
-//			else csout<<(x[i+1]-x[i])/(x[i]-x[i-1])<<" ";
-//			if(s[i+1]-s[i]>s[i]-s[i-1]) csout<<(s[i]-s[i-1])/(s[i+1]-s[i])<<" "<<endl;
-//			else csout<<(s[i+1]-s[i])/(s[i]-s[i-1])<<endl;
-//		}
+
 	}
 //	csout.close();
 //	for(int i=0;i<p.size();i++) cout<<energy_grid[i]<<" "<<p[i]<<endl;
