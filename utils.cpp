@@ -38,13 +38,26 @@ vector<double> spacings(const vector<double> &x, int start, int end){
 	return out;
 }
 vector<double> unfoldE(const vector<double> &x, int mesh){
-	vector<double> s(x.size());
+	vector<double> energy_grid=make_grid(x,mesh);
+	vector<double> integrated_DOS=make_DOS(x,energy_grid);
+	return make_S(x,energy_grid,integrated_DOS);
+
+}
+//computes a grid of energies to calculate the DOS in
+vector<double> make_grid(const vector<double> &x, int mesh){
 	vector<double> energy_grid(mesh);
-	vector<double> p(mesh); //density of states
 	double dE=(x.back()-x[0])/(1.*mesh-5.);
 	for(int i=0;i<mesh;i++) energy_grid[i]=x[0]+dE*(i-1);
+	return energy_grid;
+}
+//given a set of energies, computes their integrated density of states on a provided grid
+vector<double> make_DOS(const vector<double> &x, const vector<double> &energy_grid){
+	int mesh=energy_grid.size();	
 	int mark=0,count;
+	double dE=energy_grid[1]-energy_grid[0];
 
+	vector<double> p(mesh); //density of states
+	vector<double> integrated_DOS(mesh,0);
 	for(int i=0;i<mesh;i++){
 		//for density of states, count how many states are within a certain energy window
 		count=0;
@@ -64,7 +77,6 @@ vector<double> unfoldE(const vector<double> &x, int mesh){
 		if(mark==x.size()) break;
 	}
 	//compute integrated density of states with trapezoid rule
-	vector<double> integrated_DOS(mesh,0);
 	for(int i=1;i<mesh;i++)
 		integrated_DOS[i]=0.5*(p[i]+p[i-1])*(energy_grid[i]-energy_grid[i-1])+integrated_DOS[i-1];
 
@@ -72,7 +84,11 @@ vector<double> unfoldE(const vector<double> &x, int mesh){
 	dos.open("dos");
 	for(int i=0;i<mesh;i++) dos<<energy_grid[i]<<" "<<p[i]<<" "<<integrated_DOS[i]<<endl;
 	dos.close();
-	//use integrated density of states to get S, do a linear approximation between the different vales of integrated_DOS
+	return integrated_DOS;
+}
+//unfolds energies, given a density of states
+vector<double> make_S(const vector<double> &x, const vector<double> &energy_grid, const vector<double> &integrated_DOS){
+	vector<double> s(x.size());
 	vector<double>::const_iterator low;
 	int pos;
 	for(int i=0;i<(signed)x.size();i++){

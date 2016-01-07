@@ -49,6 +49,10 @@ vector<double> unfoldE(const vector<double> &x, int mesh=100);
 double compute_r(const vector<double> &s, int start=-1, int end=-1);
 vector<double> spacings(const vector<double> &x, int start=-1, int end=-1);
 
+vector<double> make_grid(const vector<double> &x, int mesh);
+vector<double> make_DOS(const vector<double> &x, const vector<double> &energy_grid);
+vector<double> make_S(const vector<double> &x, const vector<double> &energy_grid, const vector<double> &integrated_DOS);
+
 //computes kullback-leibler divergences (see arxiv 1411.0660)
 template<class ART>
 double kullback_leibler(const vector<ART> &x, const vector<ART> &y){
