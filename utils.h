@@ -45,7 +45,7 @@ void density_of_states(const vector<double> &x, vector<double> &p, const vector<
 double level_spacings(const vector<double> &x, const vector<double> &p, const vector<double> &energy_grid, int start=-1, int end=-1);
 double stupid_spacings(const vector<double> &x, int label=0, int start=-1, int end=-1);
 
-vector<double> unfoldE(const vector<double> &x, int mesh=100);
+vector<double> unfoldE(const vector<double> &x, int mesh=200);
 double compute_r(const vector<double> &s, int start=-1, int end=-1);
 vector<double> spacings(const vector<double> &x, int start=-1, int end=-1);
 

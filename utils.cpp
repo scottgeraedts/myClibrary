@@ -33,7 +33,7 @@ vector<double> spacings(const vector<double> &x, int start, int end){
 	if(end==-1) end=x.size();
 	vector<double> out(end-start-1);
 	for(int i=start;i<end-1;i++){
-		out[i-start]=(x[i+1]-x[i])/(x[end-1]-x[start])*(end-start);
+		out[i-start]=(x[i+1]-x[i])/(x[end-1]-x[start])*(end-start-1);
 	}
 	return out;
 }
@@ -62,8 +62,8 @@ vector<double> make_DOS(const vector<double> &x, const vector<double> &energy_gr
 		//for density of states, count how many states are within a certain energy window
 		count=0;
 		while(true){
-//			if(x[mark]<energy_grid[i]) cout<<"something didn't make sense in level_spacings "<<x[mark]<<" "<<energy_grid[i]<<" "<<mark<<" "<<i<<endl;
-			if(x[mark]<energy_grid[i]+dE){
+			if(x[mark]<energy_grid[i]-0.5*dE) cout<<"something didn't make sense in level_spacings "<<x[mark]<<" "<<energy_grid[i]<<" "<<mark<<" "<<i<<endl;
+			if(x[mark]<energy_grid[i]+0.5*dE){
 				count++;
 				mark++;
 				if(mark==x.size()) break;

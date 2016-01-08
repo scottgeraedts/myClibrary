@@ -25,7 +25,11 @@ class MatrixWithProduct {
 	double E1,E2;
 	ART *dense;
 	Eigen::SparseMatrix<ART> sparse;
+	#ifdef EIGEN_USE_MKL_ALL
+	Eigen::ParadisoLDLT< Eigen::SparseMatrix<ART> > sparseLU_solver;
+	#else
 	Eigen::SimplicialLDLT< Eigen::SparseMatrix<ART> > sparseLU_solver;
+	#endif
 	Eigen::Matrix<ART, Eigen::Dynamic, 1> sparseLU_out; //used to store the results of solving the linear system in MultInvSparse
 	
 	int *ipiv;
@@ -220,7 +224,11 @@ void MatrixWithProduct<ART>::makeSparse(double E){
 	sparse.setFromTriplets(coeff.begin(), coeff.end() );
 	delete [] v;
 	delete [] w;
+	#ifdef EIGEN_USE_MKL_ALL
+	sparseLU_solver.factorize(sparse);
+	#else
 	sparseLU_solver.compute(sparse);
+	#endif
 	if(sparseLU_solver.info()!=0) {
 	  // decomposition failed
 	  cout<<"decomposition failed! "<<sparseLU_solver.info()<<endl;
@@ -344,16 +352,16 @@ inline int MatrixWithProduct< double >::eigenvalues(int stop, double E){
 		}
 	}else{
 		makeSparse(E);
-		ARSymStdEig<double, MatrixWithProduct<double> >  dprob(ncols(), stop, this, &MatrixWithProduct<double>::MultInvSparse,E,"LM");
-		dprob.FindEigenvalues();
+		ARSymStdEig<double, MatrixWithProduct<double> >  dprob(ncols(), stop, this, &MatrixWithProduct<double>::MultInvSparse,"LM");
+		dprob.FindEigenvectors();
 		
 		eigvals=vector<double>(dprob.ConvergedEigenvalues(),0);
 		eigvecs=vector<vector<double> >(dprob.ConvergedEigenvalues(),temp);
 		for(int k=0;k<dprob.ConvergedEigenvalues();k++){
-			//eigvals[k]=1./dprob.Eigenvalue(k).real()+E;
-			eigvals[k]=dprob.Eigenvalue(k);
-			cout<<eigvals[k]<<endl;
-			//eigvecs[k]=*(dprob.StlEigenvector(k));
+			eigvals[k]=1./dprob.Eigenvalue(k)+E;
+//			eigvals[k]=dprob.Eigenvalue(k);
+//			cout<<eigvals[k]<<endl;
+			eigvecs[k]=*(dprob.StlEigenvector(k));
 		}
 		Nconverged=dprob.ConvergedEigenvalues();
 	}
