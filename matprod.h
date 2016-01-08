@@ -25,11 +25,7 @@ class MatrixWithProduct {
 	double E1,E2;
 	ART *dense;
 	Eigen::SparseMatrix<ART> sparse;
-	#ifdef EIGEN_USE_MKL_ALL
-	Eigen::ParadisoLDLT< Eigen::SparseMatrix<ART> > sparseLU_solver;
-	#else
 	Eigen::SimplicialLDLT< Eigen::SparseMatrix<ART> > sparseLU_solver;
-	#endif
 	Eigen::Matrix<ART, Eigen::Dynamic, 1> sparseLU_out; //used to store the results of solving the linear system in MultInvSparse
 	
 	int *ipiv;
@@ -224,11 +220,7 @@ void MatrixWithProduct<ART>::makeSparse(double E){
 	sparse.setFromTriplets(coeff.begin(), coeff.end() );
 	delete [] v;
 	delete [] w;
-	#ifdef EIGEN_USE_MKL_ALL
-	sparseLU_solver.factorize(sparse);
-	#else
 	sparseLU_solver.compute(sparse);
-	#endif
 	if(sparseLU_solver.info()!=0) {
 	  // decomposition failed
 	  cout<<"decomposition failed! "<<sparseLU_solver.info()<<endl;
