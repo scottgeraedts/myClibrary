@@ -343,7 +343,7 @@ inline int MatrixWithProduct< double >::eigenvalues(int stop, double E){
 			eigvecs[k]=*(dprob.StlEigenvector(k));
 		}
 	}else{
-		makeSparse(E);
+		SparseFromDense(E);
 		ARSymStdEig<double, MatrixWithProduct<double> >  dprob(ncols(), stop, this, &MatrixWithProduct<double>::MultInvSparse,"LM");
 		dprob.FindEigenvectors();
 		
