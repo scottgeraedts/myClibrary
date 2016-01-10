@@ -65,7 +65,8 @@ class MatrixWithProduct {
   void SparseFromDense(double E); //makes a sparse matrix from a dense matrix and LU decomposes
   void sparseSolve(); //for testing purposes, dense solves sparse matrices
 
-  int eigenvalues(int k, double E); //computes eigenvalues and eigenvectors using ARPACK, E should be -100 if you want the ground state. If E is not -100, does shift-invert around E
+  int eigenvalues(int k, double E=-100); //computes eigenvalues and eigenvectors using ARPACK, E should be -100 if you want the ground state. If E is not -100, does shift-invert around E
+  double find_middle();
   double single_energy(string whichp); //finds only the highest or lowest state, used for estimating energy bounds before doing shift-invert to target a section of the spectrum
   double calcVarEigen(Eigen::Matrix<ART, Eigen::Dynamic, 1> v); //calculates the variance of an eigenvector to see if polishing is needed
     
@@ -277,17 +278,32 @@ double MatrixWithProduct<ART>::calcVarEigen(Eigen::Matrix<ART, Eigen::Dynamic, 1
 	return w.norm();
 }
 
-template<class ART>
-double MatrixWithProduct<ART>::single_energy(string whichp){
-	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), 5, this, &MatrixWithProduct< complex<double> >::MultMv,whichp,(int)0, 1e-4,1e6);
+template<>
+double MatrixWithProduct< complex<double> >::find_middle(){
+	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), 5, this, &MatrixWithProduct< complex<double> >::MultMv,"LR",(int)0, 1e-4,1e6);
 	dprob.FindEigenvalues();
-	return dprob.Eigenvalue(0).real();
+	double upper=dprob.Eigenvalue(0).real();
+	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob2(ncols(), 5, this, &MatrixWithProduct< complex<double> >::MultMv,"SR",(int)0, 1e-4,1e6);
+	dprob2.FindEigenvalues();
+	double lower=dprob.Eigenvalue(0).real();
+	return 0.5*(upper+lower);
+}
+
+template<>
+double MatrixWithProduct< double >::find_middle(){
+	ARSymStdEig<double, MatrixWithProduct< double > >  dprob(ncols(), 5, this, &MatrixWithProduct<double>::MultMv,"LM",(int)0, 1e-4,1e6);
+	dprob.FindEigenvalues();
+	double upper=dprob.Eigenvalue(0);
+	ARSymStdEig<double, MatrixWithProduct< double > >  dprob2(ncols(), 5, this, &MatrixWithProduct< double >::MultMv,"SM",(int)0, 1e-4,1e6);
+	dprob2.FindEigenvalues();
+	double lower=dprob.Eigenvalue(0);
+	return 0.5*(upper+lower);
 }
 	
-template<class ART> //this generic template only serves to set the default value of E
-int MatrixWithProduct< ART >::eigenvalues(int stop, double E=-100){
-	return 0;
-}
+//template<class ART> //this generic template only serves to set the default value of E
+//int MatrixWithProduct< ART >::eigenvalues(int stop, double E=-100){
+//	return 0;
+//}
 template<>
 inline int MatrixWithProduct< complex<double> >::eigenvalues(int stop, double E){
 	vector< complex<double> >temp(n,0);
