@@ -320,7 +320,8 @@ inline int MatrixWithProduct< complex<double> >::eigenvalues(int stop, double E)
 			eigvecs[k]=*(dprob.StlEigenvector(k));
 		}
 	}else{
-		SparseFromDense(E);
+		//SparseFromDense(E);
+		makeSparse(E);
 		ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), stop, this, &MatrixWithProduct< complex<double> >::MultInvSparse,"LM");
 		dprob.FindEigenvectors();
 		
@@ -359,7 +360,8 @@ inline int MatrixWithProduct< double >::eigenvalues(int stop, double E){
 			eigvecs[k]=*(dprob.StlEigenvector(k));
 		}
 	}else{
-		SparseFromDense(E);
+		makeSparse(E);
+		//SparseFromDense(E);
 		ARSymStdEig<double, MatrixWithProduct<double> >  dprob(ncols(), stop, this, &MatrixWithProduct<double>::MultInvSparse,"LM");
 		dprob.FindEigenvectors();
 		
