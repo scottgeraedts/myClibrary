@@ -44,6 +44,7 @@ class MatrixWithProduct {
 	double getE(int a){return eigvals[lowlevpos[a]];} //ARPACK sometimes returns eigenvalues in the wrong order, these functions correct that
 	vector<ART> getEV(int a){return eigvecs[lowlevpos[a]];}
 	vector<int> sort_indexes(const vector<double> &v); //sorts the output of ARPACK so that the above functions return things in the right order
+	vector<int> sort_indexes(const vector<complex <double> > &v); //sorts the output of ARPACK so that the above functions return things in the right order
 	bool compy(int,int);
 
   virtual void MultMv(ART* v, ART* w); //original Matvec
@@ -393,7 +394,28 @@ vector<int> MatrixWithProduct<ART>::sort_indexes(const vector<double> &v) {
 	int temp;
 	for(int j=idx.size();j>0;j--){
 		for(int i=0;i<j-1;i++){
-			if(v[idx[i]]>v[idx[i+1]]){
+			if(abs(v[idx[i]])<abs(v[idx[i+1]])){
+				 temp=idx[i];
+				 idx[i]=idx[i+1];
+				 idx[i+1]=temp;
+			}
+		}
+	}
+  return idx;
+}	
+template <class ART>
+vector<int> MatrixWithProduct<ART>::sort_indexes(const vector< complex<double> > &v) {
+
+  // initialize original index locations
+  vector<int> idx(v.size());
+  for (int i = 0; i != idx.size(); ++i) idx[i] = i;
+
+  // sort indexes based on comparing values in v
+	//I can't use std::sort because c++ is super gay
+	int temp;
+	for(int j=idx.size();j>0;j--){
+		for(int i=0;i<j-1;i++){
+			if(norm(v[idx[i]])>norm(v[idx[i+1]]) ){
 				 temp=idx[i];
 				 idx[i]=idx[i+1];
 				 idx[i+1]=temp;
