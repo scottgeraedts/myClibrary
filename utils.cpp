@@ -226,6 +226,11 @@ vector<int> bitset_to_pos(int x,int NPhi){
 	}
 	return out;
 }
+int bittest(int state,int bit){	
+	if (state & 1<<bit) return 1;
+	else return 0;
+}
+
 
 ///***Some functions related to calculating Clebsch-Gordan coefficients, which uses a lot of factorials, etc
 //computes the products of numbers from start to stop (a partial factorial)

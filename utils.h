@@ -74,6 +74,8 @@ void write_vector(Eigen::Matrix<double,-1,1> &data, string filename, double C=1.
 int count_bits(int x);
 //returns the locations of flipped bits in a bitset
 vector<int> bitset_to_pos(int x,int NPhi);
+//sees if a certain bit is set
+int bittest(int state, int bit);
 
 ///***Some functions related to calculating Clebsch-Gordan coefficients, which uses a lot of factorials, etc
 //computes the products of numbers from start to stop (a partial factorial)
