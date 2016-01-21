@@ -218,6 +218,14 @@ int count_bits(int x){
 	}
 	return out;
 }
+//returns positions of flipped bits in a bitset
+vector<int> bitset_to_pos(int x,int NPhi){
+	vector<int> out;
+	for(int i=0;i<NPhi;i++){
+		if (x & 1<<i) out.push_back(i);
+	}
+	return out;
+}
 
 ///***Some functions related to calculating Clebsch-Gordan coefficients, which uses a lot of factorials, etc
 //computes the products of numbers from start to stop (a partial factorial)
