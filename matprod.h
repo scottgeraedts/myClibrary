@@ -10,6 +10,7 @@ this can do all kinds of things to a matrix, all it needs is a matvec that inher
 #include <Eigen/SparseCholesky>
 #include <Eigen/SparseLU>
 #include <Eigen/Dense>
+#include <Eigen/PardisoSupport>
 using namespace std;
 
 #include "arscomp.h"
@@ -25,7 +26,11 @@ class MatrixWithProduct {
 	double E1,E2;
 	ART *dense;
 	Eigen::SparseMatrix<ART> sparse;
+#ifdef EIGEN_USE_MKL_ALL
+	Eigen::PardisoLDLT< Eigen::SparseMatrix<ART> > sparseLU_solver;
+#else
 	Eigen::SimplicialLDLT< Eigen::SparseMatrix<ART> > sparseLU_solver;
+#endif
 	Eigen::Matrix<ART, Eigen::Dynamic, 1> sparseLU_out; //used to store the results of solving the linear system in MultInvSparse
 	
 	int *ipiv;
@@ -221,7 +226,12 @@ void MatrixWithProduct<ART>::makeSparse(double E){
 	sparse.setFromTriplets(coeff.begin(), coeff.end() );
 	delete [] v;
 	delete [] w;
+#ifdef EIGEN_USE_MKL_ALL	
 	sparseLU_solver.compute(sparse);
+#else
+	sparseLU_solver.compute(sparse);
+#endif
+
 	if(sparseLU_solver.info()!=0) {
 	  // decomposition failed
 	  cout<<"decomposition failed! "<<sparseLU_solver.info()<<endl;
@@ -241,7 +251,6 @@ void MatrixWithProduct<ART>::SparseFromDense(double E){
 			
 template<class ART>
 void MatrixWithProduct<ART>::MultInvSparse(ART *v, ART *w){
-
 	Eigen::Map <Eigen::Matrix<ART, Eigen::Dynamic, 1> > mapped_v(v,n);
 	sparseLU_out=sparseLU_solver.solve(mapped_v);
 	Eigen::Map <Eigen::Matrix<ART, -1, 1> > (w,n,1)=sparseLU_out; //using just out.data() fails for an unknown reason
@@ -322,9 +331,11 @@ inline int MatrixWithProduct< complex<double> >::eigenvalues(int stop, double E)
 	}else{
 		//SparseFromDense(E);
 		makeSparse(E);
+		cout<<"about to try to diagonalize"<<endl;
 		ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), stop, this, &MatrixWithProduct< complex<double> >::MultInvSparse,"LM");
+		cout<<"constructed"<<endl;
 		dprob.FindEigenvectors();
-		
+		cout<<"got the eigenvectors"<<endl;	
 		eigvals=vector<double>(dprob.ConvergedEigenvalues(),0);
 		eigvecs=vector<vector< complex<double> > >(dprob.ConvergedEigenvalues(),temp);
 		for(int k=0;k<dprob.ConvergedEigenvalues();k++){
@@ -360,10 +371,21 @@ inline int MatrixWithProduct< double >::eigenvalues(int stop, double E){
 			eigvecs[k]=*(dprob.StlEigenvector(k));
 		}
 	}else{
+		time_t walltime=time(NULL);
+		clock_t CPUtime=clock();
 		makeSparse(E);
+		walltime=time(NULL)-walltime;
+		CPUtime=clock()-CPUtime;
+		cout<<"the LU decomposition took "<<(float)CPUtime/CLOCKS_PER_SEC<<" CPU time and "<<walltime<<" walltime"<<endl;
 		//SparseFromDense(E);
+
+		walltime=time(NULL);
+		CPUtime=clock();
 		ARSymStdEig<double, MatrixWithProduct<double> >  dprob(ncols(), stop, this, &MatrixWithProduct<double>::MultInvSparse,"LM");
 		dprob.FindEigenvectors();
+		walltime=time(NULL)-walltime;
+		CPUtime=clock()-CPUtime;
+		cout<<"the eigensolving took "<<(float)CPUtime/CLOCKS_PER_SEC<<" CPU time and "<<walltime<<" walltime"<<endl;
 		
 		eigvals=vector<double>(dprob.ConvergedEigenvalues(),0);
 		eigvecs=vector<vector<double> >(dprob.ConvergedEigenvalues(),temp);
@@ -386,7 +408,7 @@ vector<int> MatrixWithProduct<ART>::sort_indexes(const vector<double> &v) {
 
   // initialize original index locations
   vector<int> idx(v.size());
-  for (int i = 0; i != idx.size(); ++i) idx[i] = i;
+  for (int i = 0; i != (signed) idx.size(); ++i) idx[i] = i;
 
   // sort indexes based on comparing values in v
 	//I can't use std::sort because c++ is super gay
