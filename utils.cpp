@@ -394,6 +394,26 @@ int lil_sign(int x){
 	if(x%2==0) return 1;
 	else return -1;
 }	
+vector<int> sort_indexes(const vector<double> &v) {
+
+  // initialize original index locations
+  vector<int> idx(v.size());
+  for (int i = 0; i != idx.size(); ++i) idx[i] = i;
+
+  // sort indexes based on comparing values in v
+	//I can't use std::sort because c++ is super gay
+	int temp;
+	for(int j=idx.size();j>0;j--){
+		for(int i=0;i<j-1;i++){
+			if(v[idx[i]]>v[idx[i+1]]){
+				 temp=idx[i];
+				 idx[i]=idx[i+1];
+				 idx[i+1]=temp;
+			}
+		}
+	}
+  return idx;
+}
 //int lookup_flipped(int state,int a, int b, const vector<int> &states){
 //	int compare=state ^ 1<<a;
 //	compare=compare ^ 1<<b;

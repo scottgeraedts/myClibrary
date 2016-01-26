@@ -7,6 +7,7 @@ this can do all kinds of things to a matrix, all it needs is a matvec that inher
 
 //#include "lapacke.h"
 #include <iostream>
+#include "utils.h"
 #include <Eigen/SparseCholesky>
 #include <Eigen/SparseLU>
 #include <Eigen/Dense>
@@ -39,7 +40,7 @@ class MatrixWithProduct {
 
  public:
 
-  int nrows() { return m; }//size of matrix, ncols is kept for backwards compatibility with ARPACK but shouldnt be used
+  int nrows() { return m; }//size of matrix, nrows is kept for backwards compatibility with ARPACK but shouldnt be used
   int ncols() { return n; }
 	void setrows(int x){ 
 		m=x; n=x;
@@ -50,7 +51,7 @@ class MatrixWithProduct {
 	vector<int> lowlevpos;
 	double getE(int a){return eigvals[lowlevpos[a]];} //ARPACK sometimes returns eigenvalues in the wrong order, these functions correct that
 	vector<ART> getEV(int a){return eigvecs[lowlevpos[a]];}
-	vector<int> sort_indexes(const vector<double> &v); //sorts the output of ARPACK so that the above functions return things in the right order
+//	vector<int> sort_indexes(const vector<double> &v); //sorts the output of ARPACK so that the above functions return things in the right order
 	bool compy(int,int);
 
   virtual void MultMv(ART* v, ART* w); //original Matvec
@@ -405,27 +406,27 @@ inline int MatrixWithProduct< double >::eigenvalues(int stop, double E){
 	
 }
 
-template <class ART>
-vector<int> MatrixWithProduct<ART>::sort_indexes(const vector<double> &v) {
+//template <class ART>
+//vector<int> MatrixWithProduct<ART>::sort_indexes(const vector<double> &v) {
 
-  // initialize original index locations
-  vector<int> idx(v.size());
-  for (int i = 0; i != idx.size(); ++i) idx[i] = i;
+//  // initialize original index locations
+//  vector<int> idx(v.size());
+//  for (int i = 0; i != idx.size(); ++i) idx[i] = i;
 
-  // sort indexes based on comparing values in v
-	//I can't use std::sort because c++ is super gay
-	int temp;
-	for(int j=idx.size();j>0;j--){
-		for(int i=0;i<j-1;i++){
-			if(v[idx[i]]>v[idx[i+1]]){
-				 temp=idx[i];
-				 idx[i]=idx[i+1];
-				 idx[i+1]=temp;
-			}
-		}
-	}
-  return idx;
-}	
+//  // sort indexes based on comparing values in v
+//	//I can't use std::sort because c++ is super gay
+//	int temp;
+//	for(int j=idx.size();j>0;j--){
+//		for(int i=0;i<j-1;i++){
+//			if(v[idx[i]]>v[idx[i+1]]){
+//				 temp=idx[i];
+//				 idx[i]=idx[i+1];
+//				 idx[i+1]=temp;
+//			}
+//		}
+//	}
+//  return idx;
+//}	
 //destructor, delete the dense matrices
 template<class ART>
 MatrixWithProduct<ART>::~MatrixWithProduct(){

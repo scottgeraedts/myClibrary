@@ -96,4 +96,6 @@ int lookup_flipped(int i, const vector<int> &states, int numbits, ...);
 //int lookup_flipped(int state,int a, int b, const vector<int> &states);
 int permute_sign(int n, ...);
 int lil_sign(int x);
+
+vector<int> sort_indexes(const vector<double> &x);
 #endif
