@@ -80,10 +80,10 @@ vector<double> make_DOS(const vector<double> &x, const vector<double> &energy_gr
 	for(int i=1;i<mesh;i++)
 		integrated_DOS[i]=0.5*(p[i]+p[i-1])*(energy_grid[i]-energy_grid[i-1])+integrated_DOS[i-1];
 
-	ofstream dos;
-	dos.open("dos");
-	for(int i=0;i<mesh;i++) dos<<energy_grid[i]<<" "<<p[i]<<" "<<integrated_DOS[i]<<endl;
-	dos.close();
+//	ofstream dos;
+//	dos.open("dos");
+//	for(int i=0;i<mesh;i++) dos<<energy_grid[i]<<" "<<p[i]<<" "<<integrated_DOS[i]<<endl;
+//	dos.close();
 	return integrated_DOS;
 }
 //unfolds energies, given a density of states
@@ -218,6 +218,19 @@ int count_bits(int x){
 	}
 	return out;
 }
+//returns positions of flipped bits in a bitset
+vector<int> bitset_to_pos(int x,int NPhi){
+	vector<int> out;
+	for(int i=0;i<NPhi;i++){
+		if (x & 1<<i) out.push_back(i);
+	}
+	return out;
+}
+int bittest(int state,int bit){	
+	if (state & 1<<bit) return 1;
+	else return 0;
+}
+
 
 ///***Some functions related to calculating Clebsch-Gordan coefficients, which uses a lot of factorials, etc
 //computes the products of numbers from start to stop (a partial factorial)
@@ -327,14 +340,18 @@ double Wigner6j(int dj1, int dj2, int dj3, int dj4, int dj5, int dj6){
 	}
 	return out;
 }
-//***given an integer (which can be thought of as a bitstring) and a set of integers (bits to flip) and a vector of integers (possible end states)
-//flips the bits and finds their positions in the vector
+//states: vector if integers
+//i: the index of the element in states whose bits you want flipped
+//numbits: the number of bits to flip
+//remaining arguments: which bits to flip
 int lookup_flipped(int i, const vector<int> &states, int numbits, ...){
 	int compare=states[i];
 	va_list ap;
+	int temp;
 	va_start(ap,numbits);
 	for(int j=0;j<numbits;j++){
-		compare=compare ^ 1<<va_arg(ap,int);
+		temp=va_arg(ap,int);
+		compare=compare ^ 1<<temp;
 	}
 	va_end(ap);
 		
@@ -381,6 +398,26 @@ int lil_sign(int x){
 	if(x%2==0) return 1;
 	else return -1;
 }	
+vector<int> sort_indexes(const vector<double> &v) {
+
+  // initialize original index locations
+  vector<int> idx(v.size());
+  for (int i = 0; i != idx.size(); ++i) idx[i] = i;
+
+  // sort indexes based on comparing values in v
+	//I can't use std::sort because c++ is super gay
+	int temp;
+	for(int j=idx.size();j>0;j--){
+		for(int i=0;i<j-1;i++){
+			if(v[idx[i]]>v[idx[i+1]]){
+				 temp=idx[i];
+				 idx[i]=idx[i+1];
+				 idx[i+1]=temp;
+			}
+		}
+	}
+  return idx;
+}
 //int lookup_flipped(int state,int a, int b, const vector<int> &states){
 //	int compare=state ^ 1<<a;
 //	compare=compare ^ 1<<b;

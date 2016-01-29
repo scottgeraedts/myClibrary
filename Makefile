@@ -2,7 +2,7 @@
 #include /home/sgeraedt/sources/arpack++/Makefile.inc
 
 CC=g++
-HOME=/home/sgeraedt
+HOME=/home/geraedts
 EIGEN_DIR=$(HOME)/sources/eigen-eigen-bdd17ee3b1b3/
 MYDIR=$(HOME)/sources/lapack-3.5.0/lapacke/include/
 MYCDIR=$(HOME)/myClibrary/
