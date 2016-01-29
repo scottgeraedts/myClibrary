@@ -70,10 +70,10 @@ vector<double> Wavefunction<ART>::entanglement_spectrum_SVD(const vector<ART> &e
 			}
 		}
 		if(!found) untraced_states.push_back( statep[i] & ~to_trace);
-	}	
+	}
 		
 	//loop over evec, putting elements in the right place
-	Eigen::Matrix<ART,-1,-1> square_wf(traced_states.size(),untraced_states.size());
+	Eigen::Matrix<ART,-1,-1> square_wf=Eigen::Matrix<ART,-1,-1>::Zero(traced_states.size(),untraced_states.size());
 	vector<int>::iterator it;
 	int traced_index, untraced_index;
 	for(int i=0;i<(signed)evec.size();i++){
@@ -83,10 +83,8 @@ vector<double> Wavefunction<ART>::entanglement_spectrum_SVD(const vector<ART> &e
 		untraced_index=it-untraced_states.begin();
 		square_wf(traced_index,untraced_index)=evec[i];
 	}
-	
 	//SVD
 	Eigen::JacobiSVD< Eigen::Matrix<ART,-1,-1> > svd(square_wf);
-	
 	//return square of output
 	int outsize=traced_states.size();
 	if(untraced_states.size()<traced_states.size()) outsize=untraced_states.size();
