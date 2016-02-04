@@ -332,8 +332,8 @@ inline int MatrixWithProduct< complex<double> >::eigenvalues(int stop, double E)
 			eigvecs[k]=*(dprob.StlEigenvector(k));
 		}
 	}else{
-		//SparseFromDense(E);
-		makeSparse(E);
+		SparseFromDense(E);
+		//makeSparse(E);
 		cout<<"about to try to diagonalize"<<endl;
 		ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), stop, this, &MatrixWithProduct< complex<double> >::MultInvSparse,"LM");
 		cout<<"constructed"<<endl;

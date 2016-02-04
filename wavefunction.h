@@ -7,6 +7,7 @@
 #include<iostream>
 #include<bitset>
 #include<algorithm>
+#include "utils.h"
 
 using namespace std;
 
