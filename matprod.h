@@ -34,12 +34,14 @@ class MatrixWithProduct {
 #else
 	Eigen::SimplicialLDLT< Eigen::SparseMatrix<ART> > sparseLU_solver;
 #endif
+	Eigen::SparseLU< Eigen::SparseMatrix<ART> > sparse_gen_solver;
 	Eigen::Matrix<ART, Eigen::Dynamic, 1> sparseLU_out; //used to store the results of solving the linear system in MultInvSparse
 	
 	int *ipiv;
 
  public:
 
+	bool hermitian; //set to false if you want to use a non-hermitian matrix
   int nrows() { return m; }//size of matrix, nrows is kept for backwards compatibility with ARPACK but shouldnt be used
   int ncols() { return n; }
 	void setrows(int x){ 
@@ -88,6 +90,7 @@ class MatrixWithProduct {
     E1=_E1; E2=_E2;
     dense=NULL;
     ipiv=NULL;
+    hermitian=true;
   } // Constructor.
   MatrixWithProduct()
   // Constructor.
@@ -97,6 +100,7 @@ class MatrixWithProduct {
     E1=0.; E2=0.;
     dense=NULL;
     ipiv=NULL;
+    hermitian=true;
   } // Constructor.
   
 	
@@ -245,17 +249,28 @@ template<class ART>
 void MatrixWithProduct<ART>::SparseFromDense(double E){
 	sparse=EigenDense.sparseView();
 	for(int i=0;i<n;i++) sparse.coeffRef(i,i)-=E;
-	sparseLU_solver.compute(sparse);
-	if(sparseLU_solver.info()!=0) {
-	  // decomposition failed
-	  cout<<"decomposition failed! "<<sparseLU_solver.info()<<endl;
-	}	
+
+	if(hermitian){
+		sparseLU_solver.compute(sparse);
+		if(sparseLU_solver.info()!=0) {
+		  // decomposition failed
+		  cout<<"decomposition failed! "<<sparseLU_solver.info()<<endl;
+		}	
+	}
+	else{
+		sparse_gen_solver.compute(sparse);
+		if(sparse_gen_solver.info()!=0) {
+		  // decomposition failed
+		  cout<<"decomposition failed! "<<sparse_gen_solver.info()<<endl;
+		}		
+	}
 }			
 			
 template<class ART>
 void MatrixWithProduct<ART>::MultInvSparse(ART *v, ART *w){
 	Eigen::Map <Eigen::Matrix<ART, Eigen::Dynamic, 1> > mapped_v(v,n);
-	sparseLU_out=sparseLU_solver.solve(mapped_v);
+	if(hermitian) sparseLU_out=sparseLU_solver.solve(mapped_v);
+	else sparseLU_out=sparse_gen_solver.solve(mapped_v);
 	Eigen::Map <Eigen::Matrix<ART, -1, 1> > (w,n,1)=sparseLU_out; //using just out.data() fails for an unknown reason
 }
 
@@ -342,7 +357,9 @@ inline int MatrixWithProduct< complex<double> >::eigenvalues(int stop, double E)
 		eigvals=vector<double>(dprob.ConvergedEigenvalues(),0);
 		eigvecs=vector<vector< complex<double> > >(dprob.ConvergedEigenvalues(),temp);
 		for(int k=0;k<dprob.ConvergedEigenvalues();k++){
-			eigvals[k]=1./dprob.Eigenvalue(k).real()+E;
+			if(hermitian) eigvals[k]=1./dprob.Eigenvalue(k).real()+E;
+			else
+				eigvals[k]=arg(1./dprob.Eigenvalue(k).real()+complex<double>(E,0));
 			//eigvals[k]=dprob.Eigenvalue(k).real();
 			eigvecs[k]=*(dprob.StlEigenvector(k));
 		}
