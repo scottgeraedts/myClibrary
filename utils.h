@@ -76,6 +76,9 @@ int count_bits(int x);
 vector<int> bitset_to_pos(int x,int NPhi);
 //sees if a certain bit is set
 int bittest(int state, int bit);
+//advances all the positions of bits in an integer, but only mod NPhi
+int cycle_bits(int in, int NPhi);
+int invert_bits(int in, int NPhi);
 
 ///***Some functions related to calculating Clebsch-Gordan coefficients, which uses a lot of factorials, etc
 //computes the products of numbers from start to stop (a partial factorial)

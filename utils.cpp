@@ -230,6 +230,24 @@ int bittest(int state,int bit){
 	if (state & 1<<bit) return 1;
 	else return 0;
 }
+int cycle_bits(int in, int NPhi){
+	int out=0;
+	for(int i=0;i<NPhi;i++){
+		if( in & 1<<i){
+			if(i==NPhi-1) out+=1;
+			else out+=1<<(i+1);
+		}
+	}
+//	cout<<"cycle in: "<<(bitset<12>)in<<" out: "<<(bitset<12>)out<<endl;
+	return out;
+}
+//spatial inversion on a bitstring
+int invert_bits(int in, int NPhi){
+	int out=0;
+	for(int i=0;i<NPhi;i++)
+		if(in & 1<<i) out=out | 1<<(NPhi-1-i);
+	return out;
+}	
 
 
 ///***Some functions related to calculating Clebsch-Gordan coefficients, which uses a lot of factorials, etc
