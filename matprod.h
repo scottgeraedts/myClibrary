@@ -376,6 +376,7 @@ inline int MatrixWithProduct< double >::eigenvalues(int stop, double E){
 	}else{
 		time_t walltime=time(NULL);
 		clock_t CPUtime=clock();
+		cout<<"making sparse"<<endl;
 		makeSparse(E);
 		walltime=time(NULL)-walltime;
 		CPUtime=clock()-CPUtime;
@@ -384,6 +385,7 @@ inline int MatrixWithProduct< double >::eigenvalues(int stop, double E){
 
 		walltime=time(NULL);
 		CPUtime=clock();
+		cout<<"diagonalizing"<<endl;
 		ARSymStdEig<double, MatrixWithProduct<double> >  dprob(ncols(), stop, this, &MatrixWithProduct<double>::MultInvSparse,"LM");
 		dprob.FindEigenvectors();
 		walltime=time(NULL)-walltime;
