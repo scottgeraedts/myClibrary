@@ -30,7 +30,11 @@ class MatrixWithProduct {
 	ART *dense;
 	Eigen::SparseMatrix<ART> sparse;
 #ifdef EIGEN_USE_MKL_ALL
+#ifdef USE_COMPLEX
 	Eigen::PardisoLDLT< Eigen::SparseMatrix<ART> > sparseLU_solver;
+#else
+	Eigen::SimplicialLDLT< Eigen::SparseMatrix<ART> > sparseLU_solver;
+#endif
 #else
 	Eigen::SimplicialLDLT< Eigen::SparseMatrix<ART> > sparseLU_solver;
 #endif
@@ -274,6 +278,7 @@ void MatrixWithProduct<ART>::MultInvSparse(ART *v, ART *w){
 	Eigen::Map <Eigen::Matrix<ART, -1, 1> > (w,n,1)=sparseLU_out; //using just out.data() fails for an unknown reason
 }
 
+//uses Eigen's libraries to implement a matrix product, which (when the matrix is small enough to be stored) can be a lot faster
 template<class ART>
 void MatrixWithProduct<ART>::MultMv(ART *v, ART *w){
 
@@ -305,6 +310,7 @@ double MatrixWithProduct<ART>::calcVarEigen(Eigen::Matrix<ART, Eigen::Dynamic, 1
 	return w.norm();
 }
 
+//finds the energy in the middle of the spectrum, as for as I know nothing is using this, but TFIM models could if I'm in a situtation where this isn't know a priori
 template<>
 double MatrixWithProduct< complex<double> >::find_middle(){
 	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), 5, this, &MatrixWithProduct< complex<double> >::MultMv,"LR",(int)0, 1e-4,1e6);
@@ -315,7 +321,6 @@ double MatrixWithProduct< complex<double> >::find_middle(){
 	double lower=dprob.Eigenvalue(0).real();
 	return 0.5*(upper+lower);
 }
-
 template<>
 double MatrixWithProduct< double >::find_middle(){
 	ARSymStdEig<double, MatrixWithProduct< double > >  dprob(ncols(), 5, this, &MatrixWithProduct<double>::MultMv,"LM",(int)0, 1e-4,1e6);
@@ -327,6 +332,13 @@ double MatrixWithProduct< double >::find_middle(){
 	return 0.5*(upper+lower);
 }
 	
+
+template<>
+double MatrixWithProduct< complex<double> >::single_energy(string type){
+	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), 5, this, &MatrixWithProduct< complex<double> >::MultMv,type,(int)0, 1e-4,1e6);
+	dprob.FindEigenvalues();
+	return dprob.Eigenvalue(0).real();
+}
 //template<class ART> //this generic template only serves to set the default value of E
 //int MatrixWithProduct< ART >::eigenvalues(int stop, double E=-100){
 //	return 0;
@@ -338,6 +350,7 @@ inline int MatrixWithProduct< complex<double> >::eigenvalues(int stop, double E)
 	if (E==-100){
 		ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), stop, this, &MatrixWithProduct< complex<double> >::MultMv,"SR",(int)0, 1e-10,1e6);
 		dprob.FindEigenvectors();
+		cout<<"got eigenvalues"<<endl;
 		Nconverged=dprob.ConvergedEigenvalues();
 
 		eigvals=vector<double>(Nconverged,0);
@@ -347,8 +360,8 @@ inline int MatrixWithProduct< complex<double> >::eigenvalues(int stop, double E)
 			eigvecs[k]=*(dprob.StlEigenvector(k));
 		}
 	}else{
-		SparseFromDense(E);
-		//makeSparse(E);
+		//SparseFromDense(E);
+		makeSparse(E);
 		cout<<"about to try to diagonalize"<<endl;
 		ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), stop, this, &MatrixWithProduct< complex<double> >::MultInvSparse,"LM");
 		cout<<"constructed"<<endl;
