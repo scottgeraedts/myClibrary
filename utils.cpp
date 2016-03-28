@@ -201,14 +201,23 @@ void write_vector(Eigen::Matrix<double,-1,1> &data, string filename, double C){
 	ofstream out;
 	out.open(filename.c_str());
 	data/=C;
-	for(int i=0;i<data.size();i++) out<<data[i]<<" ";
+	for(int i=0;i<data.size();i++) out<<data(i)<<" ";
+	out<<endl;
+	out.close();
+}
+//writes a vector to a provided file, optionally divides the vector by something first
+void write_vector(const vector<double> &data, string filename, double C){
+	ofstream out;
+	out.open(filename.c_str());
+	for(int i=0;i<data.size();i++) out<<data[i]/C<<" ";
 	out<<endl;
 	out.close();
 }
 
 //counts the number of set bits in an integer
-int count_bits(int x){
-	int out=0, i=0,found_bits=0;
+int count_bits(unsigned int x){
+	int out=0, i=0;
+	unsigned int found_bits=0;
 	while(x!=found_bits){
 		if(1<<i & x){
 			out++;
@@ -219,19 +228,19 @@ int count_bits(int x){
 	return out;
 }
 //returns positions of flipped bits in a bitset
-vector<int> bitset_to_pos(int x,int NPhi){
+vector<int> bitset_to_pos(unsigned int x,int NPhi){
 	vector<int> out;
 	for(int i=0;i<NPhi;i++){
 		if (x & 1<<i) out.push_back(i);
 	}
 	return out;
 }
-int bittest(int state,int bit){	
+int bittest(unsigned int state,int bit){	
 	if (state & 1<<bit) return 1;
 	else return 0;
 }
-int cycle_bits(int in, int NPhi){
-	int out=0;
+unsigned int cycle_bits(unsigned int in, int NPhi){
+	unsigned int out=0;
 	for(int i=0;i<NPhi;i++){
 		if( in & 1<<i){
 			if(i==NPhi-1) out+=1;
@@ -242,7 +251,7 @@ int cycle_bits(int in, int NPhi){
 	return out;
 }
 //spatial inversion on a bitstring
-int invert_bits(int in, int NPhi){
+unsigned int invert_bits(unsigned int in, int NPhi){
 	int out=0;
 	for(int i=0;i<NPhi;i++)
 		if(in & 1<<i) out=out | 1<<(NPhi-1-i);

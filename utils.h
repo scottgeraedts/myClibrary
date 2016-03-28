@@ -69,16 +69,17 @@ double kullback_leibler(const vector<ART> &x, const vector<ART> &y){
 
 //writes a vector to a provided file, optionally divides the vector by something first
 void write_vector(Eigen::Matrix<double,-1,1> &data, string filename, double C=1.);
+void write_vector(const vector<double> &data, string filename, double C=1.);
 
 //counts the number of set bits in an integer
-int count_bits(int x);
+int count_bits(unsigned int x);
 //returns the locations of flipped bits in a bitset
-vector<int> bitset_to_pos(int x,int NPhi);
+vector<int> bitset_to_pos(unsigned int x,int NPhi);
 //sees if a certain bit is set
-int bittest(int state, int bit);
+int bittest(unsigned int state, int bit);
 //advances all the positions of bits in an integer, but only mod NPhi
-int cycle_bits(int in, int NPhi);
-int invert_bits(int in, int NPhi);
+unsigned int cycle_bits(unsigned int in, int NPhi);
+unsigned int invert_bits(unsigned int in, int NPhi);
 
 ///***Some functions related to calculating Clebsch-Gordan coefficients, which uses a lot of factorials, etc
 //computes the products of numbers from start to stop (a partial factorial)
