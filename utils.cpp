@@ -205,15 +205,6 @@ void write_vector(Eigen::Matrix<double,-1,1> &data, string filename, double C){
 	out<<endl;
 	out.close();
 }
-//writes a vector to a provided file, optionally divides the vector by something first
-void write_vector(const vector<double> &data, string filename, double C){
-	ofstream out;
-	out.open(filename.c_str());
-	for(int i=0;i<data.size();i++) out<<data[i]/C<<" ";
-	out<<endl;
-	out.close();
-}
-
 //counts the number of set bits in an integer
 int count_bits(unsigned int x){
 	int out=0, i=0;

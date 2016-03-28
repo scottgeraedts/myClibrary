@@ -69,7 +69,6 @@ double kullback_leibler(const vector<ART> &x, const vector<ART> &y){
 
 //writes a vector to a provided file, optionally divides the vector by something first
 void write_vector(Eigen::Matrix<double,-1,1> &data, string filename, double C=1.);
-void write_vector(const vector<double> &data, string filename, double C=1.);
 
 //counts the number of set bits in an integer
 int count_bits(unsigned int x);
