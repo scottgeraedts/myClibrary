@@ -248,6 +248,14 @@ unsigned int invert_bits(unsigned int in, int NPhi){
 		if(in & 1<<i) out=out | 1<<(NPhi-1-i);
 	return out;
 }	
+//computes the difference between two bitstrings
+int distance_calc(const vector<int> &a, const vector<int> &b){
+        int out=0;
+        if(a.size()!=b.size()) cout<<"bitstrings not the same size!"<<endl;
+        for (unsigned int i = 0; i < a.size(); i += 1)
+             out+=pow(a[i]-b[i],2);
+        return out;
+}
 
 
 ///***Some functions related to calculating Clebsch-Gordan coefficients, which uses a lot of factorials, etc

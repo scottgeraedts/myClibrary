@@ -79,6 +79,8 @@ int bittest(unsigned int state, int bit);
 //advances all the positions of bits in an integer, but only mod NPhi
 unsigned int cycle_bits(unsigned int in, int NPhi);
 unsigned int invert_bits(unsigned int in, int NPhi);
+//computes how different two bitstrings are
+int distance_calc(const vector<int> &a, const vector<int> &b);
 
 ///***Some functions related to calculating Clebsch-Gordan coefficients, which uses a lot of factorials, etc
 //computes the products of numbers from start to stop (a partial factorial)
