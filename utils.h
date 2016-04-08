@@ -39,8 +39,27 @@ T value_from_file(ifstream &infile, T def){
 	else return def;
 }	
 
-//given a vector, computes its level spacing ratio
+template<class T>
+void Eigen_To_Std(const Eigen::Matrix<T,-1,1> &invec, vector<T> &outvec){
+	//turn Eigen::Vector into array
+	T *w=new T[invec.size()];
+	Eigen::Map <Eigen::Matrix<T,-1,1> > (w,invec.size(),1)=invec; //using just out.data() fails for an unknown reason
 
+	//turn array into std vector
+	outvec=vector<T>(w,w+invec.size());
+	delete [] w;
+}	
+
+template<class T>
+Eigen::Matrix<T,-1,1> Std_To_Eigen(vector<T> &invec){
+	T *v=&invec[0];
+
+	//turn invec into an Eigen::Vector
+	Eigen::Map <Eigen::Matrix<T,-1,1> > mapped_v(v,invec.size());
+	return mapped_v;
+
+}
+//given a vector, computes its level spacing ratio
 void density_of_states(const vector<double> &x, vector<double> &p, const vector<double> &energy_grid, int start=-1, int end=-1);
 double level_spacings(const vector<double> &x, const vector<double> &p, const vector<double> &energy_grid, int start=-1, int end=-1);
 double stupid_spacings(const vector<double> &x, int label=0, int start=-1, int end=-1);

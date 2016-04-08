@@ -11,6 +11,7 @@ this can do all kinds of things to a matrix, all it needs is a matvec that inher
 #include <Eigen/SparseCholesky>
 #include <Eigen/SparseLU>
 #include <Eigen/Dense>
+
 #ifdef EIGEN_USE_MKL_ALL
 #include <Eigen/PardisoSupport>
 #endif
@@ -237,11 +238,7 @@ void MatrixWithProduct<ART>::makeSparse(double E){
 	sparse.setFromTriplets(coeff.begin(), coeff.end() );
 	delete [] v;
 	delete [] w;
-#ifdef EIGEN_USE_MKL_ALL	
 	sparseLU_solver.compute(sparse);
-#else
-	sparseLU_solver.compute(sparse);
-#endif
 
 	if(sparseLU_solver.info()!=0) {
 	  // decomposition failed
@@ -311,30 +308,30 @@ double MatrixWithProduct<ART>::calcVarEigen(Eigen::Matrix<ART, Eigen::Dynamic, 1
 }
 
 //finds the energy in the middle of the spectrum, as for as I know nothing is using this, but TFIM models could if I'm in a situtation where this isn't know a priori
-template<>
-double MatrixWithProduct< complex<double> >::find_middle(){
-	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), 5, this, &MatrixWithProduct< complex<double> >::MultMv,"LR",(int)0, 1e-4,1e6);
-	dprob.FindEigenvalues();
-	double upper=dprob.Eigenvalue(0).real();
-	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob2(ncols(), 5, this, &MatrixWithProduct< complex<double> >::MultMv,"SR",(int)0, 1e-4,1e6);
-	dprob2.FindEigenvalues();
-	double lower=dprob.Eigenvalue(0).real();
-	return 0.5*(upper+lower);
-}
-template<>
-double MatrixWithProduct< double >::find_middle(){
-	ARSymStdEig<double, MatrixWithProduct< double > >  dprob(ncols(), 5, this, &MatrixWithProduct<double>::MultMv,"LM",(int)0, 1e-4,1e6);
-	dprob.FindEigenvalues();
-	double upper=dprob.Eigenvalue(0);
-	ARSymStdEig<double, MatrixWithProduct< double > >  dprob2(ncols(), 5, this, &MatrixWithProduct< double >::MultMv,"SM",(int)0, 1e-4,1e6);
-	dprob2.FindEigenvalues();
-	double lower=dprob.Eigenvalue(0);
-	return 0.5*(upper+lower);
-}
+//template<>
+//double MatrixWithProduct< complex<double> >::find_middle(){
+//	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), 5, this, &MatrixWithProduct< complex<double> >::MultMv,"LR",(int)0, 1e-4,1e6);
+//	dprob.FindEigenvalues();
+//	double upper=dprob.Eigenvalue(0).real();
+//	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob2(ncols(), 5, this, &MatrixWithProduct< complex<double> >::MultMv,"SR",(int)0, 1e-4,1e6);
+//	dprob2.FindEigenvalues();
+//	double lower=dprob.Eigenvalue(0).real();
+//	return 0.5*(upper+lower);
+//}
+//template<>
+//double MatrixWithProduct< double >::find_middle(){
+//	ARSymStdEig<double, MatrixWithProduct< double > >  dprob(ncols(), 5, this, &MatrixWithProduct<double>::MultMv,"LM",(int)0, 1e-4,1e6);
+//	dprob.FindEigenvalues();
+//	double upper=dprob.Eigenvalue(0);
+//	ARSymStdEig<double, MatrixWithProduct< double > >  dprob2(ncols(), 5, this, &MatrixWithProduct< double >::MultMv,"SM",(int)0, 1e-4,1e6);
+//	dprob2.FindEigenvalues();
+//	double lower=dprob.Eigenvalue(0);
+//	return 0.5*(upper+lower);
+//}
 	
 
 template<>
-double MatrixWithProduct< complex<double> >::single_energy(string type){
+inline double MatrixWithProduct< complex<double> >::single_energy(string type){
 	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), 5, this, &MatrixWithProduct< complex<double> >::MultMv,type,(int)0, 1e-4,1e6);
 	dprob.FindEigenvalues();
 	return dprob.Eigenvalue(0).real();
