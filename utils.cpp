@@ -444,6 +444,8 @@ vector<int> sort_indexes(const vector<double> &v) {
 	}
   return idx;
 }
+int supermod(int x, int NPhi){	return (x%NPhi+NPhi)%NPhi; }
+
 //int lookup_flipped(int state,int a, int b, const vector<int> &states){
 //	int compare=state ^ 1<<a;
 //	compare=compare ^ 1<<b;

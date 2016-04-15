@@ -122,4 +122,5 @@ int permute_sign(int n, ...);
 int lil_sign(int x);
 
 vector<int> sort_indexes(const vector<double> &x);
+int supermod(int,int);
 #endif
