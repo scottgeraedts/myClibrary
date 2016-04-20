@@ -20,7 +20,7 @@ private:
 public:
 	void init_wavefunction(int);
 
-	//entanglement entropy stuff
+	//entanglement entropy stuff, deprecated because SVD is way better
 	int ee_setup(int trunc_start, int trunc_end, const vector<int> &statep);
 	void ee_compute_rho(const vector<ART> &evec, Eigen::Matrix<ART,-1,-1> &rho2,  const vector<int> &statep, double coeff);
 	double ee_eval_rho(Eigen::Matrix<ART,-1,-1> &rho2);
@@ -32,6 +32,7 @@ public:
 	
 	//entanglement entropy stuff using SVD
 	vector<double> entanglement_spectrum_SVD(const vector<ART> &evec, const vector<int> &statep, int to_trace, int charge);
+	double von_neumann_entropy(const vector<ART> &evec, const vector<int> &statep, int to_trace, int charge);
 	
 	int rangeToBitstring(int start,int end);
 };
@@ -49,6 +50,14 @@ int Wavefunction<ART>::rangeToBitstring(int start, int end){
 	return out;
 }
 
+template<class ART>
+double Wavefunction<ART>::von_neumann_entropy (const vector<ART> &evec, const vector<int> &statep, int to_trace,int charge=-1){
+	vector<double> spectrum=entanglement_spectrum_SVD(evec,statep,to_trace,charge);
+	double out=0;
+	for(int i=0;i<(signed)spectrum.size();i++)
+		out-=spectrum[i]*log(spectrum[i]);
+	return out;
+}
 template<class ART>
 vector<double> Wavefunction<ART>::entanglement_spectrum_SVD(const vector<ART> &evec, const vector<int> &statep, int to_trace,int charge=-1){
 	//get  mapping of original states to truncated/untruncated states
