@@ -52,12 +52,14 @@ int Wavefunction<ART>::rangeToBitstring(int start, int end){
 }
 
 template<class ART>
-double Wavefunction<ART>::von_neumann_entropy (const vector<ART> &evec, const vector<int> &statep, int to_trace,int charge=-1){
-	vector<double> spectrum=entanglement_spectrum_SVD(evec,statep,to_trace,charge);
+double Wavefunction<ART>::von_neumann_entropy (const vector<ART> &evec, const vector<int> &statep, int to_trace,int max_charge){
+	vector<double> spectrum;
 	double out=0;
-	double trace=accumulate(spectrum.begin(),spectrum.end(),0.);
-	for(int i=0;i<(signed)spectrum.size();i++)
-		out-=spectrum[i]/trace*log(spectrum[i]/trace);
+	for(int c=0;c<=max_charge;c++){
+		spectrum=entanglement_spectrum_SVD(evec,statep,to_trace,c);
+		for(int i=0;i<(signed)spectrum.size();i++)
+			out-=spectrum[i]*log(spectrum[i]);
+	}
 	return out;
 }
 template<class ART>
