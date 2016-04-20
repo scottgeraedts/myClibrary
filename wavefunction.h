@@ -8,6 +8,7 @@
 #include<bitset>
 #include<algorithm>
 #include "utils.h"
+#include <numeric>
 
 using namespace std;
 
