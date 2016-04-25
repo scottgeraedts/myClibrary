@@ -135,7 +135,7 @@ void MatrixWithProduct<ART>::MultM2v(ART* v, ART* w)
 //turn the matvec into a dense matrix
 template<class ART>
 void MatrixWithProduct<ART>::makeDense(){
-    EigenDense=Eigen::Matrix<ART,-1,-1>::Zero(n,n);
+	 EigenDense=Eigen::Matrix<ART,-1,-1>::Zero(n,n);
 //	dense=new ART[n*n];
 	ART *v=new ART[n];
 	ART *w=new ART[n];
@@ -219,7 +219,6 @@ void MatrixWithProduct<ART>::makeSparse(double E){
 	sparse.resize(n,n);
 	vector<Eigen::Triplet<ART> > coeff;
 	Eigen::Triplet<ART> temp;
-	dense=new ART[n*n];
 	ART *v=new ART[n];
 	ART *w=new ART[n];
 	for(int i=0;i<n;i++){
