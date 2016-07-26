@@ -33,6 +33,7 @@ public:
 	
 	//entanglement entropy stuff using SVD
 	vector<double> entanglement_spectrum_SVD(const vector<ART> &evec, const vector<int> &statep, int to_trace, int charge);
+	void print_reshaped_wf(const vector<ART> &evec, const vector<int> &statep, int to_trace, int charge, string label);
 	double von_neumann_entropy(const vector<ART> &evec, const vector<int> &statep, int to_trace, int charge);
 	
 	int rangeToBitstring(int start,int end);
@@ -110,6 +111,61 @@ vector<double> Wavefunction<ART>::entanglement_spectrum_SVD(const vector<ART> &e
 	}
 	return output;
 }
+
+template<class ART>
+void Wavefunction<ART>::print_reshaped_wf(const vector<ART> &evec, const vector<int> &statep, int to_trace,int charge, string label){
+	//get  mapping of original states to truncated/untruncated states
+	vector<int> traced_states,untraced_states;
+	bool found;
+	for(int i=0;i<(signed)statep.size();i++){
+		if(count_bits(statep[i] & ~to_trace)!=charge && charge!=-1) continue;
+		found=false;
+		for(unsigned int j=0;j<traced_states.size();j++){
+			if( ( statep[i] & to_trace) ==traced_states[j]){
+				found=true;
+				break;
+			}
+		}
+		if(!found) traced_states.push_back( statep[i] & to_trace);
+		found=false;
+		for(unsigned int j=0;j<untraced_states.size();j++){
+			if( ( statep[i] & ~to_trace) ==untraced_states[j]){
+				found=true;
+				break;
+			}
+		}
+		if(!found) untraced_states.push_back( statep[i] & ~to_trace);
+	}
+		
+	//loop over evec, putting elements in the right place
+	Eigen::Matrix<ART,-1,-1> square_wf=Eigen::Matrix<ART,-1,-1>::Zero(traced_states.size(),untraced_states.size());
+	vector<int>::iterator it;
+	int traced_index, untraced_index;
+	for(int i=0;i<(signed)evec.size();i++){
+		if(count_bits(statep[i] & ~to_trace)!=charge && charge!=-1) continue;
+		it=find(traced_states.begin(),traced_states.end(),statep[i] & to_trace);
+		traced_index=it-traced_states.begin();
+		it=find(untraced_states.begin(),untraced_states.end(),statep[i] & ~to_trace);
+		untraced_index=it-untraced_states.begin();
+		square_wf(traced_index,untraced_index)=evec[i];
+	}
+	stringstream filename;
+	filename<<label<<"_real";
+	ostream realout(filename.str().c_str());
+	filename.str("");
+	filename<<label<<"_imag";
+	ostream imagout(filename.str().c_str());
+	
+	for(unsigned int i=0;i<traced_states.size();i++){
+		for(unsigned int j=0;j<untraced_states.size();j++){
+			realout<<real(square_wf(i,j))<<" ";
+			imagout<<imag(square_wf(i,j))<<" ";
+		}
+		realout<<endl;
+		imagout<<endl;
+	}
+}
+
 	
 template<class ART>
 double Wavefunction<ART>::entanglement_entropy(const vector< vector<ART> > &evec, const vector<int> &statep, int start, int end=-1){

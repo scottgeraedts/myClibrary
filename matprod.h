@@ -17,9 +17,10 @@ this can do all kinds of things to a matrix, all it needs is a matvec that inher
 #endif
 using namespace std;
 
+#ifdef USE_ARPACK
 #include "arscomp.h"
 #include "arssym.h"
-
+#endif
 
 template<class ART>
 class MatrixWithProduct {
@@ -331,9 +332,15 @@ double MatrixWithProduct<ART>::calcVarEigen(Eigen::Matrix<ART, Eigen::Dynamic, 1
 
 template<>
 inline double MatrixWithProduct< complex<double> >::single_energy(string type){
-	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), 5, this, &MatrixWithProduct< complex<double> >::MultMv,type,(int)0, 1e-4,1e6);
+#ifdef USE_ARPACK
+	ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), 5, this, &MatrixWithProduct< complex<double> >::MultMv,type,(int)0, 1e-10,1e6);
 	dprob.FindEigenvalues();
-	return dprob.Eigenvalue(0).real();
+	return dprob.Eigenvalue(4).real();
+#else 
+	cout<<"you need to set the USE_ARPACK FLAG in version.h to use this function"<<endl;
+	exit(0);
+	return 0.;
+#endif
 }
 //template<class ART> //this generic template only serves to set the default value of E
 //int MatrixWithProduct< ART >::eigenvalues(int stop, double E=-100){
@@ -341,6 +348,7 @@ inline double MatrixWithProduct< complex<double> >::single_energy(string type){
 //}
 template<>
 inline int MatrixWithProduct< complex<double> >::eigenvalues(int stop, double E){
+#ifdef USE_ARPACK
 	vector< complex<double> >temp(n,0);
 	int Nconverged;
 	if (E==-100){
@@ -381,11 +389,17 @@ inline int MatrixWithProduct< complex<double> >::eigenvalues(int stop, double E)
 	eigvals=temp_eigvals;
 	
 	return Nconverged;
+#else 
+	cout<<"you need to set the USE_ARPACK FLAG in version.h to use this function"<<endl;
+	exit(0);
+	return 0;
+#endif
 //	for(int i=0;i<Nconverged;i++) cout<<dprob.Eigenvalue(i)<<endl;
 	
 }
 template<>
 inline int MatrixWithProduct< double >::eigenvalues(int stop, double E){
+#ifdef USE_ARPACK
 	vector<double>temp(n,0);
 	int Nconverged;
 	if (E==-100){
@@ -430,6 +444,12 @@ inline int MatrixWithProduct< double >::eigenvalues(int stop, double E){
 	}
 	lowlevpos=sort_indexes(eigvals);	
 	return Nconverged;
+#else 
+	cout<<"you need to set the USE_ARPACK FLAG in version.h to use this function"<<endl;
+	exit(0);
+	return 0;
+#endif
+
 //	for(int i=0;i<Nconverged;i++) cout<<dprob.Eigenvalue(i)<<endl;
 	
 }
