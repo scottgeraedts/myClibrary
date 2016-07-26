@@ -11,6 +11,7 @@ this can do all kinds of things to a matrix, all it needs is a matvec that inher
 #include <Eigen/SparseCholesky>
 #include <Eigen/SparseLU>
 #include <Eigen/Dense>
+#include <ctime>
 
 #ifdef EIGEN_USE_MKL_ALL
 #include <Eigen/PardisoSupport>
@@ -342,6 +343,12 @@ inline double MatrixWithProduct< complex<double> >::single_energy(string type){
 	return 0.;
 #endif
 }
+template<>
+inline double MatrixWithProduct<double>::single_energy(string type){
+	ARSymStdEig<double, MatrixWithProduct<double> >  dprob(ncols(), 5, this, &MatrixWithProduct<double>::MultMv,type,(int)0, 1e-10,1e6);
+	dprob.FindEigenvalues();
+	return dprob.Eigenvalue(4);
+}
 //template<class ART> //this generic template only serves to set the default value of E
 //int MatrixWithProduct< ART >::eigenvalues(int stop, double E=-100){
 //	return 0;
@@ -365,11 +372,21 @@ inline int MatrixWithProduct< complex<double> >::eigenvalues(int stop, double E)
 		}
 	}else{
 		//SparseFromDense(E);
-		makeSparse(E);
+		clock_t t=clock();
+		time_t timer1,timer2;
+		time(&timer1);
+		//makeSparse(E);
+		SparseFromDense(E);
+		time(&timer2);
+		cout<<"time to LU decompose"<<((float)(clock()-t))/(1.*CLOCKS_PER_SEC)<<" "<<difftime(timer2,timer1)<<endl;
 		cout<<"about to try to diagonalize"<<endl;
+		t=clock();
+		time(&timer1);
 		ARCompStdEig<double, MatrixWithProduct< complex<double> > >  dprob(ncols(), stop, this, &MatrixWithProduct< complex<double> >::MultInvSparse,"LM");
 		cout<<"constructed"<<endl;
 		dprob.FindEigenvectors();
+		time(&timer2);
+		cout<<"time to diagonalize"<<((float)(clock()-t))/(1.*CLOCKS_PER_SEC)<<" "<<difftime(timer2,timer1)<<endl;
 		cout<<"got the eigenvectors"<<endl;	
 		eigvals=vector<double>(dprob.ConvergedEigenvalues(),0);
 		eigvecs=vector<vector< complex<double> > >(dprob.ConvergedEigenvalues(),temp);
@@ -417,7 +434,7 @@ inline int MatrixWithProduct< double >::eigenvalues(int stop, double E){
 		time_t walltime=time(NULL);
 		clock_t CPUtime=clock();
 		cout<<"making sparse"<<endl;
-		makeSparse(E);
+		SparseFromDense(E);
 		walltime=time(NULL)-walltime;
 		CPUtime=clock()-CPUtime;
 		cout<<"the LU decomposition took "<<(float)CPUtime/CLOCKS_PER_SEC<<" CPU time and "<<walltime<<" walltime"<<endl;
@@ -427,18 +444,18 @@ inline int MatrixWithProduct< double >::eigenvalues(int stop, double E){
 		CPUtime=clock();
 		cout<<"diagonalizing"<<endl;
 		ARSymStdEig<double, MatrixWithProduct<double> >  dprob(ncols(), stop, this, &MatrixWithProduct<double>::MultInvSparse,"LM");
-		dprob.FindEigenvectors();
+		dprob.FindEigenvalues();
 		walltime=time(NULL)-walltime;
 		CPUtime=clock()-CPUtime;
 		cout<<"the eigensolving took "<<(float)CPUtime/CLOCKS_PER_SEC<<" CPU time and "<<walltime<<" walltime"<<endl;
 		
 		eigvals=vector<double>(dprob.ConvergedEigenvalues(),0);
-		eigvecs=vector<vector<double> >(dprob.ConvergedEigenvalues(),temp);
+	//	eigvecs=vector<vector<double> >(dprob.ConvergedEigenvalues(),temp);
 		for(int k=0;k<dprob.ConvergedEigenvalues();k++){
 			eigvals[k]=1./dprob.Eigenvalue(k)+E;
 //			eigvals[k]=dprob.Eigenvalue(k);
 //			cout<<eigvals[k]<<endl;
-			eigvecs[k]=*(dprob.StlEigenvector(k));
+//			eigvecs[k]=*(dprob.StlEigenvector(k));
 		}
 		Nconverged=dprob.ConvergedEigenvalues();
 	}
@@ -478,8 +495,8 @@ inline int MatrixWithProduct< double >::eigenvalues(int stop, double E){
 //destructor, delete the dense matrices
 template<class ART>
 MatrixWithProduct<ART>::~MatrixWithProduct(){
-	delete [] dense;
-	delete [] ipiv;
+//	delete [] dense;
+//	delete [] ipiv;
 }
 #endif // MATPROD_H
 
