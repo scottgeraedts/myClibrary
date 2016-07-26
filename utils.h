@@ -12,7 +12,6 @@
 #include<Eigen/Core>
 #include<cstdarg>
 
-#include "arerror.h"
 using namespace std;
 
 //given a parameters file, it reads a value and returns it. but it also returns a default value if it can't find a value to read

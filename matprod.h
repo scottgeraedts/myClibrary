@@ -345,9 +345,15 @@ inline double MatrixWithProduct< complex<double> >::single_energy(string type){
 }
 template<>
 inline double MatrixWithProduct<double>::single_energy(string type){
+#ifdef USE_ARPACK
 	ARSymStdEig<double, MatrixWithProduct<double> >  dprob(ncols(), 5, this, &MatrixWithProduct<double>::MultMv,type,(int)0, 1e-10,1e6);
 	dprob.FindEigenvalues();
 	return dprob.Eigenvalue(4);
+#else 
+	cout<<"you need to set the USE_ARPACK FLAG in version.h to use this function"<<endl;
+	exit(0);
+	return 0.;
+#endif
 }
 //template<class ART> //this generic template only serves to set the default value of E
 //int MatrixWithProduct< ART >::eigenvalues(int stop, double E=-100){
