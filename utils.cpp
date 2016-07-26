@@ -178,7 +178,7 @@ double stupid_spacings(const vector<double> &x, int label, int start, int end){
 		if(x[i+1]-x[i]>x[i]-x[i-1]) temp=(x[i]-x[i-1])/(x[i+1]-x[i]);
 		else temp=(x[i+1]-x[i])/(x[i]-x[i-1]);
 		r+=temp;
-		outfile<<temp<<endl;
+		outfile<<temp<<" "<<x[i+1]-x[i]<<endl;
 		count++;
 	}
 	outfile.close();
@@ -256,7 +256,13 @@ int distance_calc(const vector<int> &a, const vector<int> &b){
              out+=pow(a[i]-b[i],2);
         return out;
 }
-
+unsigned int move_bit(unsigned int in, int NPhi, int x, int dx){
+	if (!(in & 1<<x) || (in & 1<<((x+dx)%NPhi) && dx!=0) ){
+		throw 0;
+	}
+	//cout<<(bitset<6>)in<<" "<<(bitset<6>)(in ^ 1<<x)<<" "<<(bitset<6>)((in^1<<x) ^ (1<<(x+dx)%NPhi))<<endl;
+	return (in ^ 1<<x) ^ (1<<(x+dx)%NPhi);
+}
 
 ///***Some functions related to calculating Clebsch-Gordan coefficients, which uses a lot of factorials, etc
 //computes the products of numbers from start to stop (a partial factorial)

@@ -12,6 +12,7 @@
 #include<Eigen/Core>
 #include<cstdarg>
 
+#include "arerror.h"
 using namespace std;
 
 //given a parameters file, it reads a value and returns it. but it also returns a default value if it can't find a value to read
@@ -100,6 +101,7 @@ unsigned int cycle_bits(unsigned int in, int NPhi);
 unsigned int invert_bits(unsigned int in, int NPhi);
 //computes how different two bitstrings are
 int distance_calc(const vector<int> &a, const vector<int> &b);
+unsigned int move_bit(unsigned int in, int NPhi, int x, int dx);
 
 ///***Some functions related to calculating Clebsch-Gordan coefficients, which uses a lot of factorials, etc
 //computes the products of numbers from start to stop (a partial factorial)
