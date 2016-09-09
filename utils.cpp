@@ -288,6 +288,17 @@ int intpow(int x, int p)
   if (p%2 == 0) return tmp * tmp;
   else return x * tmp * tmp;
 }
+unsigned int cycle_M(unsigned int in, int NPhi, int M, int &sign){
+	int out=0,old=in;
+	for(int i=0;i<M;i++){
+		out=cycle_bits(old,NPhi);
+		if (out<old && NPhi%4==0) sign*=-1;
+		old=out;
+	}
+	return out;
+}
+
+
 double ClebschGordan(int dj1,int dj2, int dm1, int dm2, int dJ){
 //calculate CG coefficients from the formula on wikipedia
 //annoyingly, the inputs to CG coefficients can be half-integer. Therefore this function takes TWICE the actual number as input

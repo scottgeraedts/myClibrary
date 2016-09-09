@@ -110,6 +110,8 @@ double factorial(int n);
 long int comb(int x,int p);
 //a function for computing powers of integers
 int intpow(int x, int p);
+unsigned int cycle_M(unsigned int in, int NPhi, int M, int &sign);
+
 
 double ClebschGordan(int dj1, int dj2, int dm1, int dm2, int dJ);
 double Wigner3j(int dj1, int dj2, int dj3, int dm1, int dm2, int dm3);
