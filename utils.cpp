@@ -279,12 +279,12 @@ long int comb(int x,int p){
 	return factorial(x,x-p)/factorial(p);	
 }
 //a function for computing powers of integers
-int intpow(int x, int p)
+unsigned long int intpow(int x, int p)
 {
   if (p == 0) return 1;
   if (p == 1) return x;
 
-  int tmp = intpow(x, p/2);
+  unsigned long int tmp = intpow(x, p/2);
   if (p%2 == 0) return tmp * tmp;
   else return x * tmp * tmp;
 }

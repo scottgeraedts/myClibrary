@@ -31,7 +31,6 @@ class MatrixWithProduct {
 	int m, n; // Number of rows and columns.
 	double E1,E2;
 	ART *dense;
-	Eigen::SparseMatrix<ART> sparse;
 #ifdef EIGEN_USE_MKL_ALL
 #ifdef USE_COMPLEX
 	Eigen::PardisoLDLT< Eigen::SparseMatrix<ART> > sparseLU_solver;
@@ -54,6 +53,7 @@ class MatrixWithProduct {
 	void setrows(int x){ 
 		m=x; n=x;
 	}
+	Eigen::SparseMatrix<ART> sparse;
 	
 	vector<double> eigvals;
 	vector< vector<ART> > eigvecs;
@@ -78,7 +78,7 @@ class MatrixWithProduct {
 	void printDense();//prints the dense matrix
 
   void MultInvSparse(ART*v, ART* w); //uses precomputed LU decomposition to solve a system when doing shift-invert
-  void makeSparse(double E); //makes a sparse matrix from a matvec and LU decomposes
+  void makeSparse(); //makes a sparse matrix 
   void SparseFromDense(double E); //makes a sparse matrix from a dense matrix and LU decomposes
   void sparseSolve(); //for testing purposes, dense solves sparse matrices
 
@@ -217,7 +217,7 @@ void MatrixWithProduct<ART>::denseSolve(){
 }
 */
 template<class ART>
-void MatrixWithProduct<ART>::makeSparse(double E){
+void MatrixWithProduct<ART>::makeSparse(){
 	sparse.resize(n,n);
 	vector<Eigen::Triplet<ART> > coeff;
 	Eigen::Triplet<ART> temp;
@@ -230,7 +230,6 @@ void MatrixWithProduct<ART>::makeSparse(double E){
 			w[j]=0;
 		}
 		MultMv(v,w);
-		for(int j=0;j<n;j++) w[j]-=v[j]*E;
 		for(int j=0; j<n; j++){
 		//	if (w[j]!=0) temp=Eigen::Triplet<ART>(j,i,w[j]);
 			if (abs(w[j])>1e-16) coeff.push_back( Eigen::Triplet<ART>(j,i,w[j]) );
@@ -239,12 +238,7 @@ void MatrixWithProduct<ART>::makeSparse(double E){
 	sparse.setFromTriplets(coeff.begin(), coeff.end() );
 	delete [] v;
 	delete [] w;
-	sparseLU_solver.compute(sparse);
 
-	if(sparseLU_solver.info()!=0) {
-	  // decomposition failed
-	  cout<<"decomposition failed! "<<sparseLU_solver.info()<<endl;
-	}	
 }
 
 template<class ART>

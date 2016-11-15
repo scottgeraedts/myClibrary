@@ -109,7 +109,7 @@ double factorial(int n);
 //x choose p
 long int comb(int x,int p);
 //a function for computing powers of integers
-int intpow(int x, int p);
+unsigned long int intpow(int x, int p);
 unsigned int cycle_M(unsigned int in, int NPhi, int M, int &sign);
 
 
