@@ -230,17 +230,6 @@ int bittest(unsigned int state,int bit){
 	if (state & 1<<bit) return 1;
 	else return 0;
 }
-unsigned int cycle_bits(unsigned int in, int NPhi){
-	unsigned int out=0;
-	for(int i=0;i<NPhi;i++){
-		if( in & 1<<i){
-			if(i==NPhi-1) out+=1;
-			else out+=1<<(i+1);
-		}
-	}
-//	cout<<"cycle in: "<<(bitset<12>)in<<" out: "<<(bitset<12>)out<<endl;
-	return out;
-}
 //spatial inversion on a bitstring
 unsigned int invert_bits(unsigned int in, int NPhi){
 	int out=0;
@@ -255,13 +244,6 @@ int distance_calc(const vector<int> &a, const vector<int> &b){
         for (unsigned int i = 0; i < a.size(); i += 1)
              out+=pow(a[i]-b[i],2);
         return out;
-}
-unsigned int move_bit(unsigned int in, int NPhi, int x, int dx){
-	if (!(in & 1<<x) || (in & 1<<((x+dx)%NPhi) && dx!=0) ){
-		throw 0;
-	}
-	//cout<<(bitset<6>)in<<" "<<(bitset<6>)(in ^ 1<<x)<<" "<<(bitset<6>)((in^1<<x) ^ (1<<(x+dx)%NPhi))<<endl;
-	return (in ^ 1<<x) ^ (1<<(x+dx)%NPhi);
 }
 
 ///***Some functions related to calculating Clebsch-Gordan coefficients, which uses a lot of factorials, etc
@@ -288,16 +270,6 @@ unsigned long int intpow(int x, int p)
   if (p%2 == 0) return tmp * tmp;
   else return x * tmp * tmp;
 }
-unsigned int cycle_M(unsigned int in, int NPhi, int M, int &sign){
-	int out=0,old=in;
-	for(int i=0;i<M;i++){
-		out=cycle_bits(old,NPhi);
-		if (out<old && NPhi%4==0) sign*=-1;
-		old=out;
-	}
-	return out;
-}
-
 
 double ClebschGordan(int dj1,int dj2, int dm1, int dm2, int dJ){
 //calculate CG coefficients from the formula on wikipedia
@@ -382,36 +354,6 @@ double Wigner6j(int dj1, int dj2, int dj3, int dj4, int dj5, int dj6){
 		}
 	}
 	return out;
-}
-//states: vector if integers
-//i: the index of the element in states whose bits you want flipped
-//numbits: the number of bits to flip
-//remaining arguments: which bits to flip
-int lookup_flipped(int i, const vector<int> &states, int numbits, ...){
-	int compare=states[i];
-	va_list ap;
-	int temp;
-	va_start(ap,numbits);
-	for(int j=0;j<numbits;j++){
-		temp=va_arg(ap,int);
-		compare=compare ^ 1<<temp;
-	}
-	va_end(ap);
-		
-	vector<int>::const_iterator low;
-	low=lower_bound(states.begin(),states.end(),compare);
-	if(low!=states.end()) return (low-states.begin());
-	else{
-		cout<<"error in lookup_flipped: "<<(bitset<30>)states[i]<<" "<<(bitset<30>)compare<<endl;
-		va_list ap;
-		va_start(ap,numbits);
-		for(int j=0;j<numbits;j++){
-			cout<<va_arg(ap,int)<<endl;
-		}
-		va_end(ap);
-		exit(0);	
-		return 0;
-	}
 }
 int permute_sign(int n, ...){
 	int sign=1;

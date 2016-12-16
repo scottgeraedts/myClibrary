@@ -1,7 +1,7 @@
 #load makefile from arpack
 #include /home/sgeraedt/sources/arpack++/Makefile.inc
 
-CC=icpc -g
+CC=icpc 
 HOME=/home/geraedts
 
 
