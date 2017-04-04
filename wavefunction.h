@@ -69,7 +69,7 @@ vector<double> Wavefunction<ART>::entanglement_spectrum_SVD(const vector<ART> &e
 	vector<int> traced_states,untraced_states;
 	bool found;
 	for(int i=0;i<(signed)statep.size();i++){
-		if(count_bits(statep[i] & ~to_trace)!=charge && charge!=-1) continue;
+		if(count_bits(statep[i] & to_trace)!=charge && charge!=-1) continue;
 		found=false;
 		for(unsigned int j=0;j<traced_states.size();j++){
 			if( ( statep[i] & to_trace) ==traced_states[j]){
@@ -93,7 +93,7 @@ vector<double> Wavefunction<ART>::entanglement_spectrum_SVD(const vector<ART> &e
 	vector<int>::iterator it;
 	int traced_index, untraced_index;
 	for(int i=0;i<(signed)evec.size();i++){
-		if(count_bits(statep[i] & ~to_trace)!=charge && charge!=-1) continue;
+		if(count_bits(statep[i] & to_trace)!=charge && charge!=-1) continue;
 		it=find(traced_states.begin(),traced_states.end(),statep[i] & to_trace);
 		traced_index=it-traced_states.begin();
 		it=find(untraced_states.begin(),untraced_states.end(),statep[i] & ~to_trace);
